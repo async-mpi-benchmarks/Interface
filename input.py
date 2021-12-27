@@ -1,105 +1,133 @@
 import re
-from enum import Enum
+import json
 from operator import attrgetter
 
-class attr(Enum):
-	OPERATION = 0
-	BEFORE = 1
-	AFTER = 2
-	TAG = 3
-	DEST = 4
-	RANK = 5
-	REQUEST = 6
-	COMM = 7
+class Init:
+	opertion_type = 'Init'
+	def __init__(self, string):
+		self.t_before = int(string[2])
+		self.time = float(string[4])
+	def print(self):
+		print(str(self.opertion_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time))
+
+
+class Finalize:
+	opertion_type = 'Finalize'
+	def __init__(self, string):
+		self.t_before = int(string[2])
+		self.time = float(string[4])
+		self.rank = int(string[6])
+	def print(self):
+		print(str(self.opertion_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time) + ' rank: ' + str(self.rank))
 
 class Wait:
 	opertion_type = 'Wait'
 	def __init__(self, string):
-		self.t_before = string[attr['BEFORE'].value]
-		self.t_after = string[attr['AFTER'].value]
-		self.rank = string[attr['RANK'].value]
-		self.request = string[attr['REQUEST'].value]
-
+		self.t_before = int(string[2])
+		self.t_after = int(string[4])
+		self.rank = int(string[8])
+		self.comm = int(string[6])
+		self.request = int(string[10])
 	def print(self):
-		print(self.opertion_type + ' t1: ' +self.t_before + ' t2: ' +  self.t_after + ' rank: ' + self.rank + ' req: ' +  self.request)
+		print(str(self.opertion_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' rank: ' + str(self.rank) + ' req: ' +  str(self.request))
 
 class Irecv:
 	opertion_type = 'Irecv'
 	def __init__(self, string):
-		self.t_before = string[attr['BEFORE'].value]
-		self.t_after = string[attr['AFTER'].value]
-		self.tag = string[attr['TAG'].value]
-		self.dest = string[attr['DEST'].value]
-		self.rank = string[attr['RANK'].value]
-		self.request = string[attr['REQUEST'].value]
-		self.comm = string[attr['COMM'].value]
-
+		self.t_before = int(string[2])
+		self.t_after = int(string[4])
+		self.tag = int(string[14])
+		self.dest = int(string[12])
+		self.rank = int(string[10])
+		self.request = int(string[8])
+		self.comm = int(string[6])
 	def print(self):
-		print(self.opertion_type + ' t1: ' +self.t_before + ' t2: ' +  self.t_after + ' tag: ' + self.tag + ' dest: '+ self.dest +' rank: ' + self.rank + ' req: ' +  self.request + ' comm: ' + self.comm)
+		print(str(self.opertion_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
 class Recv:
 	opertion_type = 'Recv'
 	def __init__(self, string):
-		self.t_before = string[attr['BEFORE'].value]
-		self.t_after = string[attr['AFTER'].value]
-		self.tag = string[attr['TAG'].value]
-		self.dest = string[attr['DEST'].value]
-		self.rank = string[attr['RANK'].value]
-		self.comm = string[attr['COMM'].value]
-
+		self.t_before = int(string[2])
+		self.t_after = int(string[4])
+		self.tag = int(string[12])
+		self.dest = int(string[10])
+		self.rank = int(string[8])
+		self.comm = int(string[6])
 	def print(self):
-		print(self.opertion_type + ' t1: ' +self.t_before + ' t2: ' +  self.t_after + ' tag: ' + self.tag + ' dest: '+ self.dest +' rank: ' + self.rank +  ' comm: ' + self.comm)
+		print(str(self.opertion_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
 class Send:
 	opertion_type = 'Send'
 	def __init__(self, string):
-		self.t_before = string[attr['BEFORE'].value]
-		self.t_after = string[attr['AFTER'].value]
-		self.tag = string[attr['TAG'].value]
-		self.dest = string[attr['DEST'].value]
-		self.rank = string[attr['RANK'].value]
-		self.comm = string[attr['COMM'].value]
-
+		self.t_before = int(string[2])
+		self.t_after = int(string[4])
+		self.tag = int(string[12])
+		self.dest = int(string[10])
+		self.rank = int(string[8])
+		self.comm = int(string[6])
 	def print(self):
-		print(self.opertion_type + ' t1: ' +self.t_before + ' t2: ' +  self.t_after + ' tag: ' + self.tag + ' dest: '+ self.dest +' rank: ' + self.rank +  ' comm: ' + self.comm)
+		print(str(self.opertion_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
 class Isend:
 	opertion_type = 'Isecv'
 	def __init__(self, string):
-		self.t_before = string[attr['BEFORE'].value]
-		self.t_after = string[attr['AFTER'].value]
-		self.tag = string[attr['TAG'].value]
-		self.dest = string[attr['DEST'].value]
-		self.rank = string[attr['RANK'].value]
-		self.request = string[attr['REQUEST'].value]
-		self.comm = string[attr['COMM'].value]
-
+		self.t_before = int(string[2])
+		self.t_after = int(string[4])
+		self.tag = int(string[14])
+		self.dest = int(string[12])
+		self.rank = int(string[10])
+		self.request = int(string[8])
+		self.comm = int(string[6])
 	def print(self):
-		print(self.opertion_type + ' t1: ' +self.t_before + ' t2: ' +  self.t_after + ' tag: ' + self.tag + ' dest: '+ self.dest +' rank: ' + self.rank + ' req: ' +  self.request + ' comm: ' + self.comm)
+		print(str(self.opertion_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
-file = open('exemple.dat', 'r')
+def json_reader(name):
+	f = open(name)
+	data = json.load(f)
+
+	liste = []
+
+	for elem in data:
+		tmp = str(elem)
+		string = re.findall(r'\w+[.]\w+|\w+', tmp)
+
+		if  string[0] == 'Wait':
+			liste.append(Wait(string))
+
+		elif string[0] == 'Irecv':
+			liste.append(Irecv(string))
+
+		elif  string[0] == 'Recv':
+			liste.append(Recv(string))
+
+		elif  string[0] == 'Send':
+			liste.append(Send(string))
+
+		elif  string[0] == 'Isend':
+			liste.append(Isend(string))
+		
+		elif  string[0] == 'Init':
+			liste.append(Init(string))
+		
+		elif  string[0] == 'Finalize':
+			liste.append(Finalize(string))
+
+		else:
+			print("Empty or bad format!")
+
+	f.close()
+	return liste
+
 liste = []
 
-for line in file:
-	string = re.findall(r'\w+', line)
-	if string[attr['OPERATION'].value] == 'Wait':
-		liste.append(Wait(string))
-	elif string[attr['OPERATION'].value] == 'Irecv':
-		liste.append(Irecv(string))
-	elif  string[attr['OPERATION'].value] == 'Recv':
-		liste.append(Recv(string))
-	elif  string[attr['OPERATION'].value] == 'Send':
-		liste.append(Send(string))
-	elif  string[attr['OPERATION'].value] == 'Isend':
-		liste.append(Isend(string))
-	else:
-		print("Empty or bad format!")
+liste = liste + json_reader('test.json')
+liste = liste + json_reader('test2.json')
 
 for elem in liste:
 	elem.print()
+	print(elem.t_before)
 
-liste.sort(key = lambda v: int(v.t_before))
+liste = sorted(liste,key=lambda x: x.t_before)
 print()
-
 for elem in liste:
 	elem.print()
