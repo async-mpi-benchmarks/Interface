@@ -156,7 +156,10 @@ def nb_bad_async_message(liste):
 	for elem in liste:
 		if elem.coverage < 100:
 			cpt = cpt + 1
-	return cpt
+	if len(liste):
+		return cpt
+	else:
+		return "No Async"
 
 def total_asynchronisme(liste):
 	compu_cost = 0
@@ -164,7 +167,10 @@ def total_asynchronisme(liste):
 	for elem in liste:
 		compu_cost = compu_cost + (elem.op2.t_before - elem.op1.t_after)
 		mpi_cost = mpi_cost + (elem.op1.t_after - elem.op1.t_before + elem.op2.t_after - elem.op2.t_before)
-	return (compu_cost/mpi_cost)*100
+	if len(liste):
+		return (compu_cost/mpi_cost)*100
+	else:
+		return 0
 
 def json_reader(name):
 	f = open(name)
