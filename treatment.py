@@ -1,14 +1,20 @@
 import re
 import json
 from operator import attrgetter
+from tkinter import *
 
 class Init:
 	operation_type = 'Init'
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.time = float(string[4])
+
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time))
+
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','','','','',''))
+		return table
 
 
 class Finalize:
@@ -20,6 +26,10 @@ class Finalize:
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time) + ' rank: ' + str(self.rank))
 
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'',self.rank,'','','',''))
+		return table
+
 class Wait:
 	operation_type = 'Wait'
 	def __init__(self, string):
@@ -30,6 +40,10 @@ class Wait:
 		self.request = int(string[8])
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' rank: ' + str(self.rank) + ' req: ' +  str(self.request))
+
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,'','',self.comm,self.request))
+		return table
 
 class Irecv:
 	operation_type = 'Irecv'
@@ -44,6 +58,10 @@ class Irecv:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,self.request))
+		return table
+
 class Recv:
 	operation_type = 'Recv'
 	def __init__(self, string):
@@ -55,6 +73,11 @@ class Recv:
 		self.comm = int(string[6])
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
+
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,''))
+		return table
+
 
 class Send:
 	operation_type = 'Send'
@@ -68,6 +91,10 @@ class Send:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,''))
+		return table
+
 class Isend:
 	operation_type = 'Isend'
 	def __init__(self, string):
@@ -80,6 +107,10 @@ class Isend:
 		self.comm = int(string[6])
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
+	
+	def table(self,table):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,self.request))
+		return table
 
 def make_pair_isw(mpi_operation):
 	pair_isw = []
@@ -171,19 +202,3 @@ def json_reader(name):
 
 	f.close()
 	return liste
-
-liste = []
-
-liste = liste + json_reader('test.json')
-liste = liste + json_reader('test2.json')
-
-liste = sorted(liste,key=lambda x: x.t_before)
-for elem in liste:
-	elem.print()
-
-pair_isw = make_pair_isw(liste)
-for elem in pair_isw:
-	print(elem.coverage)
-
-print(total_asynchronisme(pair_isw))
-print(nb_message(liste))
