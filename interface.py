@@ -1,7 +1,12 @@
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
+import numpy as np
 from treatment import *
 from tkinter import *
 from tkinter import filedialog
 from  tkinter import ttk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 class MainWindow(Tk):
     def __init__(self):
@@ -12,9 +17,13 @@ class MainWindow(Tk):
         self.grid_columnconfigure(10,weight=1)
         self.operation_table = False
         self.info = False
+        self.plot = False 
         self.mpi_op_list = []
         self.pair_isw = []
+        self.x = [1,2,3,4,5,6,7,8]
+        self.y = [4,1,3,6,1,3,5,2]
         self.create_ButtonFrame()
+
 
     def browseFiles(self):
         filename = filedialog.askopenfilename(initialdir = ".", title = "Select a Trace", filetypes = (("Trace File","*.json*"),("all files","*.*")))
@@ -86,16 +95,35 @@ class MainWindow(Tk):
             self.operation_table = False
             self.render_table.destroy()
 
+    def render_plot(self):
+        if self.plot == False :
+            self.plot = True
+            self.frame_plot = Frame(self)
+            self.frame_plot.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
+            fig = plt.figure() 
+            ax1 = fig.add_subplot(311)  
+            ax1.scatter(self.x,self.y)
+            ax1.grid(True) 
+            
+            canvas = FigureCanvasTkAgg(fig,master=self.frame_plot)
+            canvas.draw()
+            canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+            
+        else:
+            self.plot = False
+            self.frame_plot.destroy()
+
     def create_ButtonFrame(self):
+
         self.menu_bar = Menu(self)
 
         self.menu_bar.add_command(label = "Load", command=self.browseFiles)
-        
         self.menu_render = Menu(self.menu_bar, tearoff=0)
         self.menu_render.add_command(label = "Basic Info", command=self.render_info)
         self.menu_render.add_command(label = "Table", command=self.render_operation_table)
-        
+        self.menu_render.add_command(label = "Plot" , command=self.render_plot)
         self.menu_bar.add_cascade(label="Render",menu = self.menu_render)
+
 
         self.config(menu=self.menu_bar)
 
