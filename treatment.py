@@ -8,13 +8,15 @@ class Init:
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.time = float(string[4])
+		self.rank = ''
 
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','','','','',''))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','','','','','',''))
 		return table
+
 
 
 class Finalize:
@@ -27,8 +29,15 @@ class Finalize:
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time) + ' rank: ' + str(self.rank))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'',self.rank,'','','',''))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','',self.rank,'','','',''))
 		return table
+
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
+		x0 = offset + last_op[self.rank] - deb
+		y0 = self.rank*150 + voffset
+		x1 = offset + self.t_before - deb
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
 
 class Wait:
 	operation_type = 'Wait'
@@ -42,41 +51,79 @@ class Wait:
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' rank: ' + str(self.rank) + ' req: ' +  str(self.request))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,'','',self.comm,self.request))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,'',self.rank ,'','',self.comm,self.request))
 		return table
+
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
+		x0 = offset + last_op[self.rank] - deb
+		y0 = self.rank*150 + voffset
+		x1 = offset + self.t_before - deb
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
+		x0 = offset + self.t_before - deb
+		x1 = offset + self.t_after - deb
+		y0 = y1 + 15
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
 
 class Irecv:
 	operation_type = 'Irecv'
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.t_after = int(string[4])
-		self.tag = int(string[14])
-		self.dest = int(string[12])
-		self.rank = int(string[10])
-		self.request = int(string[8])
-		self.comm = int(string[6])
+		self.tag = int(string[16])
+		self.dest = int(string[14])
+		self.rank = int(string[12])
+		self.request = int(string[10])
+		self.comm = int(string[8])
+		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,self.request))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
+
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
+		x0 = offset + last_op[self.rank] - deb
+		y0 = self.rank*150 + voffset
+		x1 = offset + self.t_before - deb
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
+		x0 = offset + self.t_before - deb
+		x1 = offset + self.t_after - deb
+		y0 = y1 + 15
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
 
 class Recv:
 	operation_type = 'Recv'
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.t_after = int(string[4])
-		self.tag = int(string[12])
-		self.dest = int(string[10])
-		self.rank = int(string[8])
-		self.comm = int(string[6])
+		self.tag = int(string[14])
+		self.dest = int(string[12])
+		self.rank = int(string[10])
+		self.comm = int(string[8])
+		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,''))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
+
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
+		x0 = offset + last_op[self.rank] - deb
+		y0 = self.rank*150 + voffset
+		x1 = offset + self.t_before - deb
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
+		x0 = offset + self.t_before - deb
+		x1 = offset + self.t_after - deb
+		y0 = y1 + 15
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
 
 
 class Send:
@@ -84,33 +131,59 @@ class Send:
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.t_after = int(string[4])
-		self.tag = int(string[12])
-		self.dest = int(string[10])
-		self.rank = int(string[8])
-		self.comm = int(string[6])
+		self.tag = int(string[14])
+		self.dest = int(string[12])
+		self.rank = int(string[10])
+		self.comm = int(string[8])
+		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,''))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
+
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
+		x0 = offset + last_op[self.rank] - deb
+		y0 = self.rank*150 + voffset
+		x1 = offset + self.t_before - deb
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
+		x0 = offset + self.t_before - deb
+		x1 = offset + self.t_after - deb
+		y0 = y1 + 15
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
 
 class Isend:
 	operation_type = 'Isend'
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.t_after = int(string[4])
-		self.tag = int(string[14])
-		self.dest = int(string[12])
-		self.rank = int(string[10])
-		self.request = int(string[8])
-		self.comm = int(string[6])
+		self.tag = int(string[16])
+		self.dest = int(string[14])
+		self.rank = int(string[12])
+		self.request = int(string[10])
+		self.comm = int(string[8])
+		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 	
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.rank ,self.dest,self.tag,self.comm,self.request))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
+
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
+		x0 = offset + last_op[self.rank] - deb
+		y0 = self.rank*150 + voffset
+		x1 = offset + self.t_before - deb
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
+		x0 = offset + self.t_before - deb
+		x1 = offset + self.t_after - deb
+		y0 = y1 + 15
+		y1 = y0 + 50
+		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
 
 def make_pair_isw(mpi_operation):
 	pair_isw = []
@@ -142,7 +215,12 @@ class pair_isend_wait:
 		self.op1.print() 
 		self.op2.print()
 
-
+def nb_rank(liste):
+	max_ = 0
+	for elem in liste:
+		if elem.rank != '':
+			max_ = max(max_,elem.rank)
+	return max_ + 1
 
 def nb_message(liste):
 	cpt = 0
