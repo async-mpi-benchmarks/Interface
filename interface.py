@@ -95,20 +95,28 @@ class MainWindow(Tk):
             self.operation_table = False
             self.render_table.destroy()
 
+    def plot_debit(self):
+        print()
+    def plot_coverage(self):
+        print()
     def render_plot(self):
         if self.plot == False :
             self.plot = True
             self.frame_plot = Frame(self)
             self.frame_plot.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
             fig = plt.figure() 
-            ax1 = fig.add_subplot(311)  
-            ax1.scatter(self.x,self.y)
-            ax1.grid(True) 
-            
+            ax1 = fig.add_subplot()
+            ax1.bar(self.x,self.y) 
             canvas = FigureCanvasTkAgg(fig,master=self.frame_plot)
             canvas.draw()
-            canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-            
+            canvas.get_tk_widget().pack(side=LEFT)
+            self.frame_button=Frame(self.frame_plot,padx=3)
+            self.frame_button.pack(side=RIGHT ,anchor=CENTER)
+        
+            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5)
+            self.debit.pack(side=TOP , anchor=NW)
+            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5)
+            self.coverage.pack(side=TOP , anchor=NW)
         else:
             self.plot = False
             self.frame_plot.destroy()
