@@ -1,7 +1,12 @@
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
+import numpy as np
 from treatment import *
 from tkinter import *
 from tkinter import filedialog
 from  tkinter import ttk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 class MainWindow(Tk):
     def __init__(self):
@@ -13,10 +18,14 @@ class MainWindow(Tk):
         self.grid_columnconfigure(10,weight=1)
         self.operation_table = False
         self.info = False
+        self.plot = False 
         self.timeline = False
         self.mpi_op_list = []
         self.pair_isw = []
+        self.x = [1,2,3,4,5,6,7,8]
+        self.y = [4,1,3,6,1,3,5,2]
         self.create_ButtonFrame()
+
 
     def browseFiles(self):
         filename = filedialog.askopenfilename(initialdir = ".", title = "Select a Trace", filetypes = (("Trace File","*.json*"),("all files","*.*")))
@@ -94,6 +103,32 @@ class MainWindow(Tk):
             self.operation_table = False
             self.render_table.destroy()
 
+    def plot_debit(self):
+        print()
+    def plot_coverage(self):
+        print()
+    def render_plot(self):
+        if self.plot == False :
+            self.plot = True
+            self.frame_plot = Frame(self)
+            self.frame_plot.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
+            fig = plt.figure() 
+            ax1 = fig.add_subplot()
+            ax1.bar(self.x,self.y) 
+            canvas = FigureCanvasTkAgg(fig,master=self.frame_plot)
+            canvas.draw()
+            canvas.get_tk_widget().pack(side=LEFT)
+            self.frame_button=Frame(self.frame_plot,padx=3)
+            self.frame_button.pack(side=RIGHT ,anchor=CENTER)
+        
+            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5)
+            self.debit.pack(side=TOP , anchor=NW)
+            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5)
+            self.coverage.pack(side=TOP , anchor=NW)
+        else:
+            self.plot = False
+            self.frame_plot.destroy()
+
     def render_timeline(self):
         if self.timeline == False:
             self.timeline = True
@@ -143,17 +178,19 @@ class MainWindow(Tk):
             self.timeline = False
             self.frame_timeline.destroy()
 
+
     def create_ButtonFrame(self):
+
         self.menu_bar = Menu(self)
 
         self.menu_bar.add_command(label = "Load", command=self.browseFiles)
-        
         self.menu_render = Menu(self.menu_bar, tearoff=0)
         self.menu_render.add_command(label = "Basic Info", command=self.render_info)
         self.menu_render.add_command(label = "Table", command=self.render_operation_table)
+        self.menu_render.add_command(label = "Plot" , command=self.render_plot)
         self.menu_render.add_command(label = "Timeline" , command=self.render_timeline)
-        
         self.menu_bar.add_cascade(label="Render",menu = self.menu_render)
+
 
         self.config(menu=self.menu_bar)
 
