@@ -131,7 +131,7 @@ class MainWindow(Tk):
             for i in range(0,nb_ra):
                 self.timeline_canvas.create_text(0,70+140*i,text = str(i),anchor = 'w')
             i = 0
-            step = last_time/20
+            step = round(last_time/20)
             while i < last_time:
                 self.timeline_canvas.create_text(offset + i,5,text = str(i) + "\n|",anchor = 'n')
                 i = i + step

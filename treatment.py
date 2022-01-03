@@ -44,14 +44,13 @@ class Wait:
 	def __init__(self, string):
 		self.t_before = int(string[2])
 		self.t_after = int(string[4])
-		self.rank = int(string[10])
-		self.comm = int(string[6])
-		self.request = int(string[8])
+		self.rank = int(string[8])
+		self.request = int(string[6])
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' rank: ' + str(self.rank) + ' req: ' +  str(self.request))
 
 	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,'',self.rank ,'','',self.comm,self.request))
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,'',self.rank ,'','','',self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -78,7 +77,7 @@ class Irecv:
 		self.comm = int(string[8])
 		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
 	def table(self,table):
 		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
@@ -107,7 +106,7 @@ class Recv:
 		self.comm = int(string[8])
 		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
 	def table(self,table):
 		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
@@ -137,7 +136,7 @@ class Send:
 		self.comm = int(string[8])
 		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
 	def table(self,table):
 		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
@@ -167,7 +166,7 @@ class Isend:
 		self.comm = int(string[8])
 		self.nb_bytes = int(string[6])
 	def print(self):
-		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + "bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
+		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 	
 	def table(self,table):
 		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
@@ -215,6 +214,29 @@ class pair_isend_wait:
 		self.op1.print() 
 		self.op2.print()
 
+class pair_send_receiv:
+
+	def  __init__(self, op1, op2):
+		self.send = op1
+		self.receiv = op2
+		self.time = self.receiv.t_after - self.send.t_before
+		self.debit = self.send.nb_bytes / self.time
+
+	def print(self):
+		self.send.print() 
+		self.receiv.print()
+		print("Debit: " + str(self.debit))
+		print("Time: " + str(self.time))
+
+def make_pair_sr(mpi_operation):
+	pair_sr = []
+	for i in range(0,len(mpi_operation)):
+		for j in range(i,len(mpi_operation)):
+			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Send')) and ((mpi_operation[j].operation_type == 'Recv') or (mpi_operation[j].operation_type == 'Irecv')):
+				if (mpi_operation[i].tag == mpi_operation[j].tag) and (mpi_operation[i].dest == mpi_operation[j].rank) and (mpi_operation[i].rank == mpi_operation[j].dest) and (mpi_operation[i].comm == mpi_operation[j].comm) and (mpi_operation[i].nb_bytes == mpi_operation[j].nb_bytes):
+					pair_sr.append(pair_send_receiv(mpi_operation[i],mpi_operation[j]))
+	return pair_sr
+
 def nb_rank(liste):
 	max_ = 0
 	for elem in liste:
@@ -249,6 +271,8 @@ def total_asynchronisme(liste):
 		return (compu_cost/mpi_cost)*100
 	else:
 		return 0
+
+
 
 def json_reader(name):
 	f = open(name)
