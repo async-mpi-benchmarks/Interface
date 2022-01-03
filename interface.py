@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.ticker
 from treatment import *
 from tkinter import *
 from tkinter import filedialog
@@ -22,8 +23,10 @@ class MainWindow(Tk):
         self.timeline = False
         self.mpi_op_list = []
         self.pair_isw = []
-        self.x = [1,2,3,4,5,6,7,8]
-        self.y = [4,1,3,6,1,3,5,2]
+        self.x = []
+        self.y = []
+        self.var_deb=IntVar()
+        self.var_cov=IntVar()
         self.create_ButtonFrame()
 
 
@@ -104,9 +107,32 @@ class MainWindow(Tk):
             self.render_table.destroy()
 
     def plot_debit(self):
-        print()
+        self.x=[]
+        self.y=[]
+        self.plot = False
+        if self.var_cov.get():
+            self.coverage.deselect()
+        self.frame_plot.destroy()
+        pair=make_pair_sr(self.mpi_op_list)
+        for elem in pair :
+            self.y.append(elem.debit)
+            self.x.append(len(self.y))
+        self.render_plot()
+
     def plot_coverage(self):
-        print()
+        self.x=[]
+        self.y=[]
+        self.plot = False
+        if self.var_deb.get():
+            self.debit.deselect()
+        self.frame_plot.destroy()
+        pair=make_pair_isw(self.mpi_op_list)
+        for elem in pair :
+            self.y.append(elem.coverage)
+            self.x.append(len(self.y))
+        self.render_plot()
+       
+
     def render_plot(self):
         if self.plot == False :
             self.plot = True
@@ -115,16 +141,20 @@ class MainWindow(Tk):
             fig = plt.figure() 
             ax1 = fig.add_subplot()
             ax1.bar(self.x,self.y) 
+            locator = matplotlib.ticker.MultipleLocator(1)
+            plt.gca().xaxis.set_major_locator(locator)
             canvas = FigureCanvasTkAgg(fig,master=self.frame_plot)
             canvas.draw()
             canvas.get_tk_widget().pack(side=LEFT)
             self.frame_button=Frame(self.frame_plot,padx=3)
             self.frame_button.pack(side=RIGHT ,anchor=CENTER)
         
-            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5)
+            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5,variable=self.var_deb)
+            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5,variable=self.var_cov)
             self.debit.pack(side=TOP , anchor=NW)
-            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5)
             self.coverage.pack(side=TOP , anchor=NW)
+
+            
         else:
             self.plot = False
             self.frame_plot.destroy()
