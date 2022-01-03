@@ -1,0 +1,44 @@
+[
+  {
+    "Init": {
+      "cycles": 1,
+      "time": 0.78
+    }
+  },
+  {
+    "Send": {
+      "cycles_lo": 9,
+      "cycles_hi": 19,
+      "bytes": 64,
+      "comm": 0,
+      "current_rank": 0,
+      "partner_rank": 1,
+      "tag": 0
+    }
+  },
+  {
+    "Recv": {
+      "cycles_lo": 69,
+      "cycles_hi": 420,
+      "bytes": 64,
+      "comm": 0,
+      "current_rank": 1,
+      "partner_rank": 0,
+      "tag": 0
+    }
+  },
+  {
+    "Finalize": {
+      "cycles": 978,
+      "time": 1024.0,
+      "current_rank": 0
+    }
+  },
+  {
+    "Finalize": {
+      "cycles": 1000,
+      "time": 1024.0,
+      "current_rank": 1
+    }
+  }
+]
