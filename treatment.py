@@ -17,8 +17,6 @@ class Init:
 		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','','','','','',''))
 		return table
 
-
-
 class Finalize:
 	operation_type = 'Finalize'
 	def __init__(self, string):

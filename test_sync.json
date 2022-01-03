@@ -36,9 +36,9 @@
   },
   {
     "Finalize": {
-      "cycles": 978,
+      "cycles": 1000,
       "time": 1024.0,
-      "current_rank": 0
+      "current_rank": 1
     }
   }
 ]
