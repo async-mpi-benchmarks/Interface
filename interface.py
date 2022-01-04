@@ -27,6 +27,7 @@ class MainWindow(Tk):
         self.y = []
         self.var_deb=IntVar()
         self.var_cov=IntVar()
+        self.ratio_cy_sec = 1
         self.create_ButtonFrame()
 
 
@@ -35,6 +36,7 @@ class MainWindow(Tk):
         if filename:
             self.mpi_op_list = json_reader(filename)
             self.mpi_op_list = sorted(self.mpi_op_list,key=lambda x: x.t_before)
+            self.ratio_cy_sec = ratio_cycle2sec(self.mpi_op_list)
 
     def render_info(self):
         if self.info == False:
@@ -115,7 +117,7 @@ class MainWindow(Tk):
         self.frame_plot.destroy()
         pair=make_pair_sr(self.mpi_op_list)
         for elem in pair :
-            self.y.append(elem.debit)
+            self.y.append(elem.debit / self.ratio_cy_sec)
             self.x.append(len(self.y))
         self.render_plot()
 

@@ -62,6 +62,7 @@ class Wait:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + " | " +  " request " + str(self.request),anchor = NW)
 
 class Irecv:
 	operation_type = 'Irecv'
@@ -92,6 +93,7 @@ class Irecv:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
+		canvas.create_text(x0 + 3 ,y0 + 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
 
 class Recv:
 	operation_type = 'Recv'
@@ -121,6 +123,7 @@ class Recv:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
+		canvas.create_text(x0 + 3,y0 + 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm),anchor = NW)
 
 
 class Send:
@@ -151,6 +154,7 @@ class Send:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm),anchor = NW)
 
 class Isend:
 	operation_type = 'Isend'
@@ -181,6 +185,7 @@ class Isend:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
 
 def make_pair_isw(mpi_operation):
 	pair_isw = []
@@ -270,6 +275,15 @@ def total_asynchronisme(liste):
 	else:
 		return 0
 
+def ratio_cycle2sec(liste):
+	if liste[0].operation_type != 'Init':
+		print("Error the first MPI operation is not an Init")
+	if liste[len(liste)-1].operation_type != 'Finalize':
+		print("Error the last MPI operation is not a Finalize")
+
+	delta_rdtsc = liste[len(liste)-1].t_before - liste[0].t_before
+	delta_time = liste[len(liste)-1].time - liste[0].time
+	return delta_rdtsc/delta_time
 
 
 def json_reader(name):
