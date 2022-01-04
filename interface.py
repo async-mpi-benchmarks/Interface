@@ -142,6 +142,12 @@ class MainWindow(Tk):
             self.frame_plot.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
             fig = plt.figure() 
             ax1 = fig.add_subplot()
+            if self.var_deb.get():
+                ax1.set_xlabel("Numéro d'envoi")
+                ax1.set_ylabel('Débit')
+            if self.var_cov.get():
+                ax1.set_xlabel("Numéro du couple Isend/Irecv Wait")
+                ax1.set_ylabel('Couverture en %')
             ax1.bar(self.x,self.y) 
             locator = matplotlib.ticker.MultipleLocator(1)
             plt.gca().xaxis.set_major_locator(locator)
