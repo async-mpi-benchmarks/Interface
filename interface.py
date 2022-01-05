@@ -11,13 +11,24 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 
 class MainWindow(Tk):
     def __init__(self):
+        
         Tk.__init__(self)
         self.title('MPI Trace Analyzer')
         self['bg'] = 'white'
         self.geometry("1280x720")
-
-        self.grid_columnconfigure(10,weight=1)
+        self.root=Canvas(self ,bg='white')
+        self.root.pack(side=TOP ,anchor=NW ,expand=True ,fill=BOTH)
+        self.root_scrollx = Scrollbar(self.root,orient='horizontal',command=self.root.xview)
+        self.root_scrollx.pack(side=BOTTOM, fill = BOTH)
+        self.root_scrolly = Scrollbar(self.root,orient='vertical',command=self.root.yview)
+        self.root_scrolly.pack(side=RIGHT, fill = BOTH)
+        self.root.config(xscrollcommand=self.root_scrollx.set, yscrollcommand=self.root_scrolly.set)
+        self.main=Frame(self.root ,bg="white")
+        #self.main.pack(side=TOP , anchor=NW)
+        self.root.configure(scrollregion=self.root.bbox("all"))
         self.operation_table = False
+        self.root.create_window((4,4), window=self.main, anchor="nw")
+        self.main.bind("<Configure>", self.onFrameConfigure)
         self.info = False
         self.plot = False 
         self.timeline = False
@@ -30,6 +41,8 @@ class MainWindow(Tk):
         self.ratio_cy_sec = 1
         self.create_ButtonFrame()
 
+    def onFrameConfigure(self, event):
+        self.root.configure(scrollregion=self.root.bbox("all"))
 
     def browseFiles(self):
         filename = filedialog.askopenfilename(initialdir = ".", title = "Select a Trace", filetypes = (("Trace File","*.json*"),("all files","*.*")))
@@ -41,7 +54,7 @@ class MainWindow(Tk):
     def render_info(self):
         if self.info == False:
             self.info = True
-            self.frame_info = Frame(self,bd = 5)
+            self.frame_info = Frame(self.main,bd = 5)
             self.frame_info.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
             
             nb_ra = nb_rank(self.mpi_op_list)
@@ -53,7 +66,7 @@ class MainWindow(Tk):
 
             self.info_text = Label(self.frame_info,text=text)
             self.info_text.pack()
-
+            self.root.configure(scrollregion=self.root.bbox("all"))
         else:
             self.info = False
             self.frame_info.destroy()
@@ -61,7 +74,7 @@ class MainWindow(Tk):
     def render_operation_table(self):
         if self.operation_table == False:
             self.operation_table = True
-            self.render_table = Frame(self,bd = 5)
+            self.render_table = Frame(self.main,bd = 5)
             self.render_table.pack(side=TOP,anchor=W,padx = 2,pady = 2)
 
             self.table_scrolly = Scrollbar(self.render_table,orient='vertical')
@@ -104,6 +117,7 @@ class MainWindow(Tk):
                 self.table=elem.table(self.table)
 
             self.table.pack()
+            self.root.configure(scrollregion=self.root.bbox("all"))
         else:
             self.operation_table = False
             self.render_table.destroy()
@@ -138,7 +152,7 @@ class MainWindow(Tk):
     def render_plot(self):
         if self.plot == False :
             self.plot = True
-            self.frame_plot = Frame(self)
+            self.frame_plot = Frame(self.main ,bg='white')
             self.frame_plot.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
             fig = plt.figure() 
             ax1 = fig.add_subplot()
@@ -154,15 +168,15 @@ class MainWindow(Tk):
             canvas = FigureCanvasTkAgg(fig,master=self.frame_plot)
             canvas.draw()
             canvas.get_tk_widget().pack(side=LEFT)
-            self.frame_button=Frame(self.frame_plot,padx=3)
+            self.frame_button=Frame(self.frame_plot,bg='white')
             self.frame_button.pack(side=RIGHT ,anchor=CENTER)
         
-            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5,variable=self.var_deb)
-            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5,variable=self.var_cov)
+            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5,variable=self.var_deb,bg='white',highlightthickness=0,activebackground="white")
+            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5,variable=self.var_cov,bg='white',highlightthickness=0,activebackground="white")
             self.debit.pack(side=TOP , anchor=NW)
             self.coverage.pack(side=TOP , anchor=NW)
 
-            
+            self.root.configure(scrollregion=self.root.bbox("all"))
         else:
             self.plot = False
             self.frame_plot.destroy()
@@ -177,10 +191,10 @@ class MainWindow(Tk):
             last_op = []
             last_time = self.mpi_op_list[len(self.mpi_op_list)-1].t_before
 
-            self.frame_timeline = Frame(self,bd=5,height = 400)
+            self.frame_timeline = Frame(self.main,bd=5,height = 400)
             self.frame_timeline.pack(side= TOP, anchor = W, padx = 2, pady = 2,fill = X)
 
-            self.timeline_canvas = Canvas(self.frame_timeline,scrollregion=(0,0,last_time,nb_ra*150))
+            self.timeline_canvas = Canvas(self.frame_timeline,scrollregion=(0,0,last_time,nb_ra*200))
 
             self.timeline_scrollx = Scrollbar(self.frame_timeline,orient='horizontal')
             self.timeline_scrollx.pack(side=BOTTOM, fill = BOTH)
@@ -211,7 +225,7 @@ class MainWindow(Tk):
 
             self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset )
             self.timeline_canvas.pack(fill = BOTH,side = LEFT,expand = True)
-
+            self.root.configure(scrollregion=self.root.bbox("all"))
         else:
             self.timeline = False
             self.frame_timeline.destroy()

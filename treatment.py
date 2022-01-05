@@ -192,7 +192,7 @@ def make_pair_isw(mpi_operation):
 	for i in range(0,len(mpi_operation)):
 		for j in range(i,len(mpi_operation)):
 			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Irecv')) and (mpi_operation[j].operation_type == 'Wait'):
-				if(mpi_operation[i].request == mpi_operation[j].request):
+				if(mpi_operation[i].request == mpi_operation[j].request )and (mpi_operation[i].rank == mpi_operation[j].rank ):
 					pair_isw.append(pair_isend_wait(mpi_operation[i],mpi_operation[j]))
 					break
 
