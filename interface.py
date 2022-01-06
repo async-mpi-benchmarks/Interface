@@ -61,7 +61,7 @@ class MainWindow(Tk):
             self.pair_isw = make_pair_isw(self.mpi_op_list)
             bad_async = nb_bad_async_message(self.pair_isw)
             tt_async = total_asynchronisme(self.pair_isw)
-            text = "Number of rank: " + str(nb_ra)+ "\n" +"Number of message sent: " + str(nb_mess) + "\n" + "Number of bad async message: " + str(bad_async) + "\n" + "Async total: " + str(round(tt_async,2)) + "%"
+            text = "Number of rank: " + str(nb_ra)+ "\n" +"Number of message sent: " + str(nb_mess)+"\n" + "Number of MPI operation: " + str(2*nb_mess) + "\n" + "Number of bad async message: " + str(bad_async) + "\n" + "% of async messages: " + str(round(tt_async,2)) + "%"
 
             self.info_text = Label(self.frame_info,text=text)
             self.info_text.pack()
@@ -114,7 +114,7 @@ class MainWindow(Tk):
             self.table.heading("Request", text = "Request", anchor=CENTER)
 
             for elem in self.mpi_op_list:
-                self.table=elem.table(self.table,deb)
+                self.table=elem.table(self.table,deb,self.ratio_cy_sec)
 
             self.table.pack()
             self.root.configure(scrollregion=self.root.bbox("all"))
@@ -157,11 +157,11 @@ class MainWindow(Tk):
             fig = plt.figure() 
             ax1 = fig.add_subplot()
             if self.var_deb.get():
-                ax1.set_xlabel("Numéro d'envoi")
-                ax1.set_ylabel('Débit')
+                ax1.set_xlabel("Number of send")
+                ax1.set_ylabel('Throughput bytes/µs')
             if self.var_cov.get():
-                ax1.set_xlabel("Numéro du couple Isend/Irecv Wait")
-                ax1.set_ylabel('Couverture en %')
+                ax1.set_xlabel("Number of couple Isend/Irecv Wait")
+                ax1.set_ylabel('Coverage in %')
             if(len(self.mpi_op_list)<100):
                 ax1.bar(self.x,self.y) 
                 locator = matplotlib.ticker.MultipleLocator(1)
@@ -176,7 +176,7 @@ class MainWindow(Tk):
             self.frame_button=Frame(self.frame_plot)
             self.frame_button.pack(side=RIGHT ,anchor=CENTER)
         
-            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5,variable=self.var_deb,highlightthickness=0)
+            self.debit=Checkbutton(self.frame_button,text="Throughput",command=self.plot_debit,bd=5,variable=self.var_deb,highlightthickness=0)
             self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5,variable=self.var_cov,highlightthickness=0)
             self.debit.pack(side=TOP , anchor=NW)
             self.coverage.pack(side=TOP , anchor=NW)
@@ -199,7 +199,7 @@ class MainWindow(Tk):
             self.frame_timeline = Frame(self.main,bd=5,height = 400)
             self.frame_timeline.pack(side= TOP, anchor = W, padx = 2, pady = 2,fill = X)
 
-            self.timeline_canvas = Canvas(self.frame_timeline,scrollregion=(0,0,last_time,nb_ra*200))
+            self.timeline_canvas = Canvas(self.frame_timeline,width=self.winfo_width()-50)
 
             self.timeline_scrollx = Scrollbar(self.frame_timeline,orient='horizontal')
             self.timeline_scrollx.pack(side=BOTTOM, fill = BOTH)
@@ -218,7 +218,7 @@ class MainWindow(Tk):
                         last_op[elem.rank] = elem.t_after
 
             for i in range(1,nb_ra):
-                self.timeline_canvas.create_line(0,i*130+voffset,last_op[i],i*130+voffset,dash=(4,4))
+                self.timeline_canvas.create_line(0,i*130+voffset,self.timeline_canvas.bbox("all")[2],i*130+voffset,dash=(4,4))
 
             for i in range(0,nb_ra):
                 self.timeline_canvas.create_text(0,70+140*i,text = str(i),anchor = 'w')
@@ -228,7 +228,7 @@ class MainWindow(Tk):
                 self.timeline_canvas.create_text(offset + i,5,text = str(i) + "\n|",anchor = 'n')
                 i = i + step
 
-            self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset)
+            self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset,scrollregion=self.timeline_canvas.bbox("all"))
             self.timeline_canvas.pack(fill = BOTH,side = LEFT,expand = True)
             self.root.configure(scrollregion=self.root.bbox("all"))
         else:

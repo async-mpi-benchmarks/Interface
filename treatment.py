@@ -13,8 +13,8 @@ class Init:
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time))
 
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,'','','','','','',''))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,'','','','','','',''))
 		return table
 
 class Finalize:
@@ -26,8 +26,8 @@ class Finalize:
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time) + ' rank: ' + str(self.rank))
 
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,'','',self.rank,'','','',''))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,'','',self.rank,'','','',''))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -47,8 +47,8 @@ class Wait:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' rank: ' + str(self.rank) + ' req: ' +  str(self.request))
 
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,'',self.rank ,'','','',self.request))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,'',self.rank ,'','','',self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -62,7 +62,7 @@ class Wait:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + " | " +  " request " + str(self.request),anchor = NW)
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + "\n" +  "request " + str(self.request),anchor = NW)
 
 class Irecv:
 	operation_type = 'Irecv'
@@ -78,8 +78,8 @@ class Irecv:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -93,7 +93,7 @@ class Irecv:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0 + 3 ,y0 + 3,text = str(self.operation_type) + "\n" + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
+		canvas.create_text(x0 + 3 ,y0 + 3,text = str(self.operation_type) + "\n" + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + "\n with request " + str(self.request),anchor = NW)
 
 class Recv:
 	operation_type = 'Recv'
@@ -108,8 +108,8 @@ class Recv:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -139,8 +139,8 @@ class Send:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -170,8 +170,8 @@ class Isend:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 	
-	def table(self,table,deb):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
+	def table(self,table,deb,ratio):
+		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -185,7 +185,7 @@ class Isend:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) +  "\n" + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) +  "\n" + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + "\nwith request " + str(self.request),anchor = NW)
 
 def make_pair_isw(mpi_operation):
 	pair_isw = []
@@ -202,7 +202,7 @@ class pair_isend_wait:
 	def coverage(self):
 		cost_op = self.op1.t_after - self.op1.t_before + self.op2.t_after - self.op2.t_before
 		cost_compu = self.op2.t_before - self.op1.t_after
-		return ((cost_compu/cost_op)*100)
+		return (cost_compu/cost_op)*100
 
 	def  __init__(self, op1, op2):
 		if op1.t_before<op2.t_before:
@@ -258,7 +258,6 @@ def nb_message(liste):
 def nb_bad_async_message(liste):
 	cpt = 0
 	for elem in liste:
-		print(elem)
 		if elem.coverage < 100:
 			cpt = cpt + 1
 	if len(liste):
