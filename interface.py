@@ -24,7 +24,6 @@ class MainWindow(Tk):
         self.root_scrolly.pack(side=RIGHT, fill = BOTH)
         self.root.config(xscrollcommand=self.root_scrollx.set, yscrollcommand=self.root_scrolly.set)
         self.main=Frame(self.root ,bg="white")
-        #self.main.pack(side=TOP , anchor=NW)
         self.root.configure(scrollregion=self.root.bbox("all"))
         self.operation_table = False
         self.root.create_window((4,4), window=self.main, anchor="nw")
@@ -74,6 +73,7 @@ class MainWindow(Tk):
     def render_operation_table(self):
         if self.operation_table == False:
             self.operation_table = True
+            deb = self.mpi_op_list[0].t_before
             self.render_table = Frame(self.main,bd = 5)
             self.render_table.pack(side=TOP,anchor=W,padx = 2,pady = 2)
 
@@ -114,7 +114,7 @@ class MainWindow(Tk):
             self.table.heading("Request", text = "Request", anchor=CENTER)
 
             for elem in self.mpi_op_list:
-                self.table=elem.table(self.table)
+                self.table=elem.table(self.table,deb)
 
             self.table.pack()
             self.root.configure(scrollregion=self.root.bbox("all"))
@@ -162,17 +162,22 @@ class MainWindow(Tk):
             if self.var_cov.get():
                 ax1.set_xlabel("Numéro du couple Isend/Irecv Wait")
                 ax1.set_ylabel('Couverture en %')
-            ax1.bar(self.x,self.y) 
-            locator = matplotlib.ticker.MultipleLocator(1)
+            if(len(self.mpi_op_list)<100):
+                ax1.bar(self.x,self.y) 
+                locator = matplotlib.ticker.MultipleLocator(1)
+            else:
+                ax1.scatter(self.x,self.y,marker='.') 
+                locator = matplotlib.ticker.AutoLocator()
+            
             plt.gca().xaxis.set_major_locator(locator)
             canvas = FigureCanvasTkAgg(fig,master=self.frame_plot)
             canvas.draw()
-            canvas.get_tk_widget().pack(side=LEFT)
-            self.frame_button=Frame(self.frame_plot,bg='white')
+            canvas.get_tk_widget().pack(side=LEFT,fill=X)
+            self.frame_button=Frame(self.frame_plot)
             self.frame_button.pack(side=RIGHT ,anchor=CENTER)
         
-            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5,variable=self.var_deb,bg='white',highlightthickness=0,activebackground="white")
-            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5,variable=self.var_cov,bg='white',highlightthickness=0,activebackground="white")
+            self.debit=Checkbutton(self.frame_button,text="Debit",command=self.plot_debit,bd=5,variable=self.var_deb,highlightthickness=0)
+            self.coverage=Checkbutton(self.frame_button,text="Coverage",command=self.plot_coverage,bd=5,variable=self.var_cov,highlightthickness=0)
             self.debit.pack(side=TOP , anchor=NW)
             self.coverage.pack(side=TOP , anchor=NW)
 
@@ -213,7 +218,7 @@ class MainWindow(Tk):
                         last_op[elem.rank] = elem.t_after
 
             for i in range(1,nb_ra):
-                self.timeline_canvas.create_line(0,i*130+voffset,self.winfo_width(),i*130+voffset,dash=(4,4))
+                self.timeline_canvas.create_line(0,i*130+voffset,last_op[i],i*130+voffset,dash=(4,4))
 
             for i in range(0,nb_ra):
                 self.timeline_canvas.create_text(0,70+140*i,text = str(i),anchor = 'w')
@@ -223,7 +228,7 @@ class MainWindow(Tk):
                 self.timeline_canvas.create_text(offset + i,5,text = str(i) + "\n|",anchor = 'n')
                 i = i + step
 
-            self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset )
+            self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset)
             self.timeline_canvas.pack(fill = BOTH,side = LEFT,expand = True)
             self.root.configure(scrollregion=self.root.bbox("all"))
         else:

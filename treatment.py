@@ -13,8 +13,8 @@ class Init:
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time))
 
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','','','','','',''))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,'','','','','','',''))
 		return table
 
 class Finalize:
@@ -26,8 +26,8 @@ class Finalize:
 	def print(self):
 		print(str(self.operation_type) + ' t: ' + str(self.t_before) + ' real time: ' + str(self.time) + ' rank: ' + str(self.rank))
 
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,'','',self.rank,'','','',''))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,'','',self.rank,'','','',''))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -47,8 +47,8 @@ class Wait:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + ' rank: ' + str(self.rank) + ' req: ' +  str(self.request))
 
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,'',self.rank ,'','','',self.request))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,'',self.rank ,'','','',self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -78,8 +78,8 @@ class Irecv:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -93,7 +93,7 @@ class Irecv:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0 + 3 ,y0 + 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
+		canvas.create_text(x0 + 3 ,y0 + 3,text = str(self.operation_type) + "\n" + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
 
 class Recv:
 	operation_type = 'Recv'
@@ -108,8 +108,8 @@ class Recv:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' +str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -123,7 +123,7 @@ class Recv:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0 + 3,y0 + 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm),anchor = NW)
+		canvas.create_text(x0 + 3,y0 + 3,text = str(self.operation_type) +  "\n" + str(self.nb_bytes) + " bytes receiv from " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm),anchor = NW)
 
 
 class Send:
@@ -139,8 +139,8 @@ class Send:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) +  ' comm: ' + str(self.comm))
 
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -154,7 +154,7 @@ class Send:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm),anchor = NW)
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) +  "\n" + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm),anchor = NW)
 
 class Isend:
 	operation_type = 'Isend'
@@ -170,8 +170,8 @@ class Isend:
 	def print(self):
 		print(str(self.operation_type) + ' t1: ' + str(self.t_before) + ' t2: ' +  str(self.t_after) + " bytes: " + str(self.nb_bytes) +' tag: ' + str(self.tag) + ' dest: '+ str(self.dest) +' rank: ' + str(self.rank) + ' req: ' +  str(self.request) + ' comm: ' + str(self.comm))
 	
-	def table(self,table):
-		table.insert(parent='',index='end',values=(self.operation_type,self.t_before,self.t_after,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
+	def table(self,table,deb):
+		table.insert(parent='',index='end',values=(self.operation_type,self.t_before-deb,self.t_after-deb,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
 
 	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
@@ -185,14 +185,14 @@ class Isend:
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
-		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) + " | " + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
+		canvas.create_text(x0+ 3,y0+ 3,text = str(self.operation_type) +  "\n" + str(self.nb_bytes) + " bytes sent to " + str(self.dest) + "\n" + "with tag " + str(self.tag) + " on comm " + str(self.comm) + " with request " + str(self.request),anchor = NW)
 
 def make_pair_isw(mpi_operation):
 	pair_isw = []
 	for i in range(0,len(mpi_operation)):
 		for j in range(i,len(mpi_operation)):
 			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Irecv')) and (mpi_operation[j].operation_type == 'Wait'):
-				if(mpi_operation[i].request == mpi_operation[j].request )and (mpi_operation[i].rank == mpi_operation[j].rank ):
+				if(mpi_operation[i].request == mpi_operation[j].request ) and (mpi_operation[i].rank == mpi_operation[j].rank ):
 					pair_isw.append(pair_isend_wait(mpi_operation[i],mpi_operation[j]))
 					break
 
@@ -238,6 +238,7 @@ def make_pair_sr(mpi_operation):
 			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Send')) and ((mpi_operation[j].operation_type == 'Recv') or (mpi_operation[j].operation_type == 'Irecv')):
 				if (mpi_operation[i].tag == mpi_operation[j].tag) and (mpi_operation[i].dest == mpi_operation[j].rank) and (mpi_operation[i].rank == mpi_operation[j].dest) and (mpi_operation[i].comm == mpi_operation[j].comm) and (mpi_operation[i].nb_bytes == mpi_operation[j].nb_bytes):
 					pair_sr.append(pair_send_receiv(mpi_operation[i],mpi_operation[j]))
+					break
 	return pair_sr
 
 def nb_rank(liste):
@@ -257,6 +258,7 @@ def nb_message(liste):
 def nb_bad_async_message(liste):
 	cpt = 0
 	for elem in liste:
+		print(elem)
 		if elem.coverage < 100:
 			cpt = cpt + 1
 	if len(liste):
