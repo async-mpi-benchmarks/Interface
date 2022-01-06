@@ -61,7 +61,7 @@ class MainWindow(Tk):
             self.pair_isw = make_pair_isw(self.mpi_op_list)
             bad_async = nb_bad_async_message(self.pair_isw)
             tt_async = total_asynchronisme(self.pair_isw)
-            text = "Number of rank: " + str(nb_ra)+ "\n" +"Number of message sent: " + str(nb_mess)+"\n" + "Number of MPI operation: " + str(2*nb_mess) + "\n" + "Number of bad async message: " + str(bad_async) + "\n" + "% of async messages: " + str(round(tt_async,2)) + "%"
+            text = "Number of rank: " + str(nb_ra)+ "\n" +"Number of message sent: " + str(nb_mess)+"\n" + "Number of MPI operation: " + str(2*nb_mess) + "\n" + "Number of bad async message: " + str(bad_async) + "\n" + "Async total: " + str(round(tt_async,2)) + "%"
 
             self.info_text = Label(self.frame_info,text=text)
             self.info_text.pack()
