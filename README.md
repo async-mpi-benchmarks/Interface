@@ -15,6 +15,7 @@ This programme has been created to process result from Interpol library
 	apt install python3-pip
 	apt install python3-tk
 	pip3 install matplotlib
+	apt install python3-pil python3-pil.imagetk
 ```
 
 ## Execution
