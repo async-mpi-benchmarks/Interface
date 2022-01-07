@@ -30,10 +30,10 @@ class Finalize:
 		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,'','',self.rank,'','','',''))
 		return table
 
-	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
-		x0 = offset + last_op[self.rank] - deb
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset,ratio):
+		x0 = offset + (last_op[self.rank] - deb)/ratio
 		y0 = self.rank*150 + voffset
-		x1 = offset + self.t_before - deb
+		x1 = offset + (self.t_before - deb)/ratio
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
 
@@ -51,14 +51,14 @@ class Wait:
 		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,'',self.rank ,'','','',self.request))
 		return table
 
-	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
-		x0 = offset + last_op[self.rank] - deb
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset,ratio):
+		x0 = offset + (last_op[self.rank] - deb)/ratio
 		y0 = self.rank*150 + voffset
-		x1 = offset + self.t_before - deb
+		x1 = offset + (self.t_before - deb)/ratio
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
-		x0 = offset + self.t_before - deb
-		x1 = offset + self.t_after - deb
+		x0 = offset + (self.t_before - deb)/ratio
+		x1 = offset + (self.t_after - deb)/ratio
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
@@ -82,14 +82,14 @@ class Irecv:
 		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
 
-	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
-		x0 = offset + last_op[self.rank] - deb
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset,ratio):
+		x0 = offset + (last_op[self.rank] - deb)/ratio
 		y0 = self.rank*150 + voffset
-		x1 = offset + self.t_before - deb
+		x1 = offset + (self.t_before - deb)/ratio
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
-		x0 = offset + self.t_before - deb
-		x1 = offset + self.t_after - deb
+		x0 = offset + (self.t_before - deb)/ratio
+		x1 = offset + (self.t_after - deb)/ratio
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
@@ -112,14 +112,14 @@ class Recv:
 		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
 
-	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
-		x0 = offset + last_op[self.rank] - deb
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset,ratio):
+		x0 = offset + (last_op[self.rank] - deb)/ratio
 		y0 = self.rank*150 + voffset
-		x1 = offset + self.t_before - deb
+		x1 = offset + (self.t_before - deb)/ratio
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
-		x0 = offset + self.t_before - deb
-		x1 = offset + self.t_after - deb
+		x0 = offset + (self.t_before - deb)/ratio
+		x1 = offset + (self.t_after - deb)/ratio
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
@@ -143,14 +143,14 @@ class Send:
 		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,''))
 		return table
 
-	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
-		x0 = offset + last_op[self.rank] - deb
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset,ratio):
+		x0 = offset + (last_op[self.rank] - deb)/ratio
 		y0 = self.rank*150 + voffset
-		x1 = offset + self.t_before - deb
+		x1 = offset + (self.t_before - deb)/ratio
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
-		x0 = offset + self.t_before - deb
-		x1 = offset + self.t_after - deb
+		x0 = offset + (self.t_before - deb)/ratio
+		x1 = offset + (self.t_after - deb)/ratio
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
@@ -174,14 +174,14 @@ class Isend:
 		table.insert(parent='',index='end',values=(self.operation_type,(self.t_before-deb)/ratio,(self.t_after-deb)/ratio,self.nb_bytes ,self.rank ,self.dest,self.tag,self.comm,self.request))
 		return table
 
-	def draw_timeline(self,deb,canvas,last_op,offset,voffset):
-		x0 = offset + last_op[self.rank] - deb
+	def draw_timeline(self,deb,canvas,last_op,offset,voffset,ratio):
+		x0 = offset + (last_op[self.rank] - deb)/ratio
 		y0 = self.rank*150 + voffset
-		x1 = offset + self.t_before - deb
+		x1 = offset + (self.t_before - deb)/ratio
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'grey')
-		x0 = offset + self.t_before - deb
-		x1 = offset + self.t_after - deb
+		x0 = offset + (self.t_before - deb)/ratio
+		x1 = offset + (self.t_after - deb)/ratio
 		y0 = y1 + 15
 		y1 = y0 + 50
 		canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')

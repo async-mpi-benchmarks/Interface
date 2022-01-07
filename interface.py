@@ -189,6 +189,7 @@ class MainWindow(Tk):
     def render_timeline(self):
         if self.timeline == False:
             self.timeline = True
+            ratio = 100
             offset = 20
             voffset = 50
             deb = self.mpi_op_list[0].t_before
@@ -213,7 +214,7 @@ class MainWindow(Tk):
                 last_op.append(deb)
             for elem in self.mpi_op_list:
                 if elem.operation_type != 'Init':
-                    elem.draw_timeline(deb,self.timeline_canvas,last_op,offset,voffset)
+                    elem.draw_timeline(deb,self.timeline_canvas,last_op,offset,voffset, ratio)
                     if elem.operation_type != 'Finalize':
                         last_op[elem.rank] = elem.t_after
 
@@ -223,9 +224,9 @@ class MainWindow(Tk):
             for i in range(0,nb_ra):
                 self.timeline_canvas.create_text(0,70+140*i,text = str(i),anchor = 'w')
             i = 0
-            step = round(last_time/20)
+            step = round(last_time/50)
             while i < last_time:
-                self.timeline_canvas.create_text(offset + i,5,text = str(i) + "\n|",anchor = 'n')
+                self.timeline_canvas.create_text(offset + i/ratio,5,text = str(i) + "\n|",anchor = 'n')
                 i = i + step
 
             self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset,scrollregion=self.timeline_canvas.bbox("all"))
