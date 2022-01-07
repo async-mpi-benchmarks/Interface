@@ -237,6 +237,7 @@ def make_pair_sr(mpi_operation):
 		for j in range(i,len(mpi_operation)):
 			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Send')) and ((mpi_operation[j].operation_type == 'Recv') or (mpi_operation[j].operation_type == 'Irecv')):
 				if (mpi_operation[i].tag == mpi_operation[j].tag) and (mpi_operation[i].dest == mpi_operation[j].rank) and (mpi_operation[i].rank == mpi_operation[j].dest) and (mpi_operation[i].comm == mpi_operation[j].comm) and (mpi_operation[i].nb_bytes == mpi_operation[j].nb_bytes):
+					print("i:" + str(i) + " j:"+str(j))
 					pair_sr.append(pair_send_receiv(mpi_operation[i],mpi_operation[j]))
 					break
 	return pair_sr

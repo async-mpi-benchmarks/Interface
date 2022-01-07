@@ -1,14 +1,14 @@
 [
   {
     "Init": {
-      "cycles": 11786190594366,
-      "time": 1641550351.079942
+      "cycles": 802316773020,
+      "time": 1641553594.684428
     }
   },
   {
     "Send": {
-      "cycles_lo": 11786274552782,
-      "cycles_hi": 11786274583188,
+      "cycles_lo": 802415663602,
+      "cycles_hi": 802415692920,
       "bytes": 800,
       "comm": 0,
       "current_rank": 0,
@@ -18,8 +18,8 @@
   },
   {
     "Recv": {
-      "cycles_lo": 11786274585916,
-      "cycles_hi": 11786274620596,
+      "cycles_lo": 802415697200,
+      "cycles_hi": 802415806562,
       "bytes": 800,
       "comm": 0,
       "current_rank": 0,
@@ -29,11 +29,11 @@
   },
   {
     "Irecv": {
-      "cycles_lo": 11786274624792,
-      "cycles_hi": 11786274626654,
+      "cycles_lo": 802415808872,
+      "cycles_hi": 802415810600,
       "bytes": 800,
       "comm": 0,
-      "req": 0,
+      "req": 3966499814,
       "current_rank": 0,
       "partner_rank": 1,
       "tag": 789
@@ -41,32 +41,32 @@
   },
   {
     "Wait": {
-      "cycles_lo": 11786274632854,
-      "cycles_hi": 11786275183154,
-      "req": 2,
+      "cycles_lo": 802415817576,
+      "cycles_hi": 802416375880,
+      "req": 3966499814,
       "current_rank": 0
     }
   },
   {
     "Finalize": {
-      "cycles": 11786384533388,
-      "time": 1641550351.16075,
+      "cycles": 802524156424,
+      "time": 1641553594.770838,
       "current_rank": 0
     }
   },
-    {
+  {
     "Init": {
-      "cycles": 11786193234384,
-      "time": 1641550351.081042
+      "cycles": 802319262220,
+      "time": 1641553594.685465
     }
   },
   {
     "Irecv": {
-      "cycles_lo": 11786274556600,
-      "cycles_hi": 11786274568556,
+      "cycles_lo": 802415731224,
+      "cycles_hi": 802415743234,
       "bytes": 800,
       "comm": 0,
-      "req": 0,
+      "req": 2169813570,
       "current_rank": 1,
       "partner_rank": 0,
       "tag": 123
@@ -74,19 +74,19 @@
   },
   {
     "Wait": {
-      "cycles_lo": 11786274578238,
-      "cycles_hi": 11786274604714,
-      "req": 2,
+      "cycles_lo": 802415755692,
+      "cycles_hi": 802415785306,
+      "req": 2169813570,
       "current_rank": 1
     }
   },
   {
     "Isend": {
-      "cycles_lo": 11786274607158,
-      "cycles_hi": 11786274611290,
+      "cycles_lo": 802415788314,
+      "cycles_hi": 802415799444,
       "bytes": 800,
       "comm": 0,
-      "req": 0,
+      "req": 852848954,
       "current_rank": 1,
       "partner_rank": 0,
       "tag": 456
@@ -94,16 +94,16 @@
   },
   {
     "Wait": {
-      "cycles_lo": 11786275162708,
-      "cycles_hi": 11786275164314,
-      "req": 2,
+      "cycles_lo": 802416356112,
+      "cycles_hi": 802416357300,
+      "req": 852848954,
       "current_rank": 1
     }
   },
   {
     "Send": {
-      "cycles_lo": 11786275174714,
-      "cycles_hi": 11786275179624,
+      "cycles_lo": 802416367258,
+      "cycles_hi": 802416372200,
       "bytes": 800,
       "comm": 0,
       "current_rank": 1,
@@ -113,8 +113,8 @@
   },
   {
     "Finalize": {
-      "cycles": 11786384506426,
-      "time": 1641550351.160739,
+      "cycles": 802523665872,
+      "time": 1641553594.770633,
       "current_rank": 1
     }
   }
