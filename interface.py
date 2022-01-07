@@ -144,7 +144,10 @@ class MainWindow(Tk):
         self.frame_plot.destroy()
         pair=make_pair_isw(self.mpi_op_list)
         for elem in pair :
-            self.y.append(elem.coverage)
+            if elem.coverage<100:
+                self.y.append(elem.coverage)
+            else:
+                self.y.append(100)
             self.x.append(len(self.y))
         self.render_plot()
        
