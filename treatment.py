@@ -222,7 +222,7 @@ class pair_send_receiv:
 	def  __init__(self, op1, op2):
 		self.send = op1
 		self.receiv = op2
-		self.time = self.receiv.t_after - self.send.t_before
+		self.time = abs(self.receiv.t_after - self.send.t_before)
 		self.debit = self.send.nb_bytes / self.time
 
 	def print(self):
@@ -237,8 +237,11 @@ def make_pair_sr(mpi_operation):
 		for j in range(i,len(mpi_operation)):
 			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Send')) and ((mpi_operation[j].operation_type == 'Recv') or (mpi_operation[j].operation_type == 'Irecv')):
 				if (mpi_operation[i].tag == mpi_operation[j].tag) and (mpi_operation[i].dest == mpi_operation[j].rank) and (mpi_operation[i].rank == mpi_operation[j].dest) and (mpi_operation[i].comm == mpi_operation[j].comm) and (mpi_operation[i].nb_bytes == mpi_operation[j].nb_bytes):
-					print("i:" + str(i) + " j:"+str(j))
 					pair_sr.append(pair_send_receiv(mpi_operation[i],mpi_operation[j]))
+					break
+			if ((mpi_operation[j].operation_type == 'Isend') or (mpi_operation[j].operation_type == 'Send')) and ((mpi_operation[i].operation_type == 'Recv') or (mpi_operation[i].operation_type == 'Irecv')):
+				if (mpi_operation[j].tag == mpi_operation[i].tag) and (mpi_operation[j].dest == mpi_operation[i].rank) and (mpi_operation[j].rank == mpi_operation[i].dest) and (mpi_operation[j].comm == mpi_operation[i].comm) and (mpi_operation[j].nb_bytes == mpi_operation[i].nb_bytes):
+					pair_sr.append(pair_send_receiv(mpi_operation[j],mpi_operation[i]))
 					break
 	return pair_sr
 

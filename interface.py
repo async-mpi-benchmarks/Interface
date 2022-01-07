@@ -158,7 +158,7 @@ class MainWindow(Tk):
             ax1 = fig.add_subplot()
             if self.var_deb.get():
                 ax1.set_xlabel("Number of send")
-                ax1.set_ylabel('Throughput bytes/µs')
+                ax1.set_ylabel('Throughput bytes/s')
             if self.var_cov.get():
                 ax1.set_xlabel("Number of couple Isend/Irecv Wait")
                 ax1.set_ylabel('Coverage in %')
@@ -189,7 +189,13 @@ class MainWindow(Tk):
     def render_timeline(self):
         if self.timeline == False:
             self.timeline = True
-            ratio = 100
+            time_len = self.mpi_op_list[len(self.mpi_op_list)-1].t_before-self.mpi_op_list[0].t_before
+            if time_len>1000000:
+                ratio = 150
+            elif time_len>100000000:
+                ratio = 1000
+            else:
+                ratio = 1
             offset = 20
             voffset = 50
             deb = self.mpi_op_list[0].t_before
@@ -212,9 +218,11 @@ class MainWindow(Tk):
             
             for i in range(0,nb_ra):
                 last_op.append(deb)
+            cpt = 0
             for elem in self.mpi_op_list:
                 if elem.operation_type != 'Init':
                     elem.draw_timeline(deb,self.timeline_canvas,last_op,offset,voffset, ratio)
+                    cpt = cpt + 1
                     if elem.operation_type != 'Finalize':
                         last_op[elem.rank] = elem.t_after
 
@@ -223,10 +231,13 @@ class MainWindow(Tk):
 
             for i in range(0,nb_ra):
                 self.timeline_canvas.create_text(0,70+140*i,text = str(i),anchor = 'w')
+
             i = 0
-            step = round(last_time/50)
-            while i < last_time:
-                self.timeline_canvas.create_text(offset + i/ratio,5,text = str(i) + "\n|",anchor = 'n')
+            step = round(self.timeline_canvas.bbox("all")[2]/10000)
+            if step<50:
+                step = 50
+            while i < self.timeline_canvas.bbox("all")[2]:
+                self.timeline_canvas.create_text(offset + i,5,text = str(i) + "\n|",anchor = 'n')
                 i = i + step
 
             self.timeline_canvas.config(xscrollcommand=self.timeline_scrollx.set, yscrollcommand=self.timeline_scrolly.set,height = nb_ra * 150 + voffset,scrollregion=self.timeline_canvas.bbox("all"))
@@ -248,7 +259,6 @@ class MainWindow(Tk):
         self.menu_render.add_command(label = "Plot" , command=self.render_plot)
         self.menu_render.add_command(label = "Timeline" , command=self.render_timeline)
         self.menu_bar.add_cascade(label="Render",menu = self.menu_render)
-
 
         self.config(menu=self.menu_bar)
 
