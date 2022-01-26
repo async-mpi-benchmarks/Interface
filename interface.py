@@ -55,13 +55,9 @@ class MainWindow(Tk):
             self.info = True
             self.frame_info = Frame(self.main,bd = 5)
             self.frame_info.pack(side=TOP,anchor=NW,padx = 2,pady = 2)
-            
-            nb_ra = nb_rank(self.mpi_op_list)
-            nb_mess = nb_message(self.mpi_op_list)
             self.pair_isw = make_pair_isw(self.mpi_op_list)
-            bad_async = nb_bad_async_message(self.pair_isw)
-            tt_async = total_asynchronisme(self.pair_isw)
-            text = "Number of rank: " + str(nb_ra)+ "\n" +"Number of message sent: " + str(nb_mess)+"\n" + "Number of MPI operation: " + str(2*nb_mess) + "\n" + "Number of bad async message: " + str(bad_async) + "\n" + "% of mpi operation " + str(round(100-tt_async,2)) + "%"
+            info = gather_info(self.mpi_op_list,self.pair_isw)
+            text = "Number of rank: " + str(info[0])+ "\n" +"Number of message sent: " + str(info[1])+"\n" + "Number of MPI function: " + str(len(self.mpi_op_list)) + "\n" + "Number of bad async message: " + str(info[2]) + "\n" + "% of mpi operation " + str(round(100-info[3],2)) + "%"
 
             self.info_text = Label(self.frame_info,text=text)
             self.info_text.pack()
@@ -129,9 +125,9 @@ class MainWindow(Tk):
         if self.var_cov.get():
             self.coverage.deselect()
         self.frame_plot.destroy()
-        pair=make_pair_sr(self.mpi_op_list)
+        pair=make_pair_sr(self.mpi_op_list,self.ratio_cy_sec)
         for elem in pair :
-            self.y.append(elem.debit / self.ratio_cy_sec)
+            self.y.append(elem.debit/1000000)
             self.x.append(len(self.y))
         self.render_plot()
 
@@ -161,7 +157,7 @@ class MainWindow(Tk):
             ax1 = fig.add_subplot()
             if self.var_deb.get():
                 ax1.set_xlabel("Number of send")
-                ax1.set_ylabel('Throughput bytes/s')
+                ax1.set_ylabel('Throughput MB/s')
             if self.var_cov.get():
                 ax1.set_xlabel("Number of couple Isend/Irecv Wait")
                 ax1.set_ylabel('Coverage in %')

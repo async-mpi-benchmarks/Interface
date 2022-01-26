@@ -219,11 +219,12 @@ class pair_isend_wait:
 
 class pair_send_receiv:
 
-	def  __init__(self, op1, op2):
+	def  __init__(self, op1, op2,ratio):
 		self.send = op1
 		self.receiv = op2
-		self.time = abs(self.receiv.t_after - self.send.t_before)
+		self.time = abs(self.receiv.t_after - self.send.t_before)/ratio
 		self.debit = self.send.nb_bytes / self.time
+
 
 	def print(self):
 		self.send.print() 
@@ -231,19 +232,49 @@ class pair_send_receiv:
 		print("Debit: " + str(self.debit))
 		print("Time: " + str(self.time))
 
-def make_pair_sr(mpi_operation):
+def make_pair_sr(mpi_operation,ratio):
 	pair_sr = []
 	for i in range(0,len(mpi_operation)):
 		for j in range(i,len(mpi_operation)):
 			if ((mpi_operation[i].operation_type == 'Isend') or (mpi_operation[i].operation_type == 'Send')) and ((mpi_operation[j].operation_type == 'Recv') or (mpi_operation[j].operation_type == 'Irecv')):
 				if (mpi_operation[i].tag == mpi_operation[j].tag) and (mpi_operation[i].dest == mpi_operation[j].rank) and (mpi_operation[i].rank == mpi_operation[j].dest) and (mpi_operation[i].comm == mpi_operation[j].comm) and (mpi_operation[i].nb_bytes == mpi_operation[j].nb_bytes):
-					pair_sr.append(pair_send_receiv(mpi_operation[i],mpi_operation[j]))
+					pair_sr.append(pair_send_receiv(mpi_operation[i],mpi_operation[j],ratio))
 					break
 			if ((mpi_operation[j].operation_type == 'Isend') or (mpi_operation[j].operation_type == 'Send')) and ((mpi_operation[i].operation_type == 'Recv') or (mpi_operation[i].operation_type == 'Irecv')):
 				if (mpi_operation[j].tag == mpi_operation[i].tag) and (mpi_operation[j].dest == mpi_operation[i].rank) and (mpi_operation[j].rank == mpi_operation[i].dest) and (mpi_operation[j].comm == mpi_operation[i].comm) and (mpi_operation[j].nb_bytes == mpi_operation[i].nb_bytes):
-					pair_sr.append(pair_send_receiv(mpi_operation[j],mpi_operation[i]))
+					pair_sr.append(pair_send_receiv(mpi_operation[j],mpi_operation[i],ratio))
 					break
 	return pair_sr
+
+def gather_info(liste_mpi_op,liste_isw):
+	info = [0] * 4
+	max_rank = 0
+	nb_message = 0
+	for elem in liste_mpi_op:
+		if elem.rank != '':
+			max_rank = max(max_rank,elem.rank)
+		if elem.operation_type == 'Send' or elem.operation_type == 'Isend':
+			nb_message = nb_message + 1
+	
+	info[0] = max_rank + 1
+	info[1] = nb_message
+
+	nb_bad_async = 0
+	compu_cost = 0
+	mpi_cost = 0
+	for elem in liste_isw:
+		if elem.coverage < 100:
+			nb_bad_async = nb_bad_async + 1
+		compu_cost = compu_cost + (elem.op2.t_before - elem.op1.t_after)
+		mpi_cost = mpi_cost + (elem.op1.t_after - elem.op1.t_before + elem.op2.t_after - elem.op2.t_before)
+
+	if len(liste_isw):
+		info[2] = nb_bad_async
+		info[3] = (compu_cost/mpi_cost)*100
+	else:
+		info[2] = "No Async"
+		info[3] = 0
+	return info
 
 def nb_rank(liste):
 	max_ = 0
@@ -279,6 +310,7 @@ def total_asynchronisme(liste):
 		return (compu_cost/mpi_cost)*100
 	else:
 		return 0
+
 
 def ratio_cycle2sec(liste):
 	if liste[0].operation_type != 'Init':
