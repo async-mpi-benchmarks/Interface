@@ -59,8 +59,7 @@ class MainWindow(Tk):
                                                          ("all files", "*.*")))
         if filename:
             self.mpi_op_list = json_reader(filename)
-            self.mpi_op_list = sorted(self.mpi_op_list,
-                                      key=lambda x: x.t_before)
+            self.mpi_op_list = sorted(self.mpi_op_list, key=lambda x: x.before)
             self.ratio_cy_sec = ratio_cycle2sec(self.mpi_op_list)
 
     def render_info(self):
@@ -88,7 +87,7 @@ class MainWindow(Tk):
     def render_operation_table(self):
         if self.operation_table == False:
             self.operation_table = True
-            deb = self.mpi_op_list[0].t_before
+            deb = self.mpi_op_list[0].before
             self.render_table = Frame(self.main, bd=5)
             self.render_table.pack(side=TOP, anchor=W, padx=2, pady=2)
 
@@ -108,12 +107,12 @@ class MainWindow(Tk):
             self.table_scrollx.config(command=self.table.xview)
             self.table_scrolly.config(command=self.table.yview)
 
-            self.table['columns'] = ('Operation_Type', 'Time_before',
-                                     'Time_after', 'Bytes', 'Rank', 'Partner',
-                                     'Tag', 'Comm', 'Request')
+            self.table['columns'] = ('op_type', 'Time_before', 'Time_after',
+                                     'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
+                                     'Request')
 
             self.table.column("#0", width=0, stretch=NO)
-            self.table.column("Operation_Type", anchor=CENTER, width=120)
+            self.table.column("op_type", anchor=CENTER, width=120)
             self.table.column("Time_before", anchor=CENTER, width=100)
             self.table.column("Time_after", anchor=CENTER, width=100)
             self.table.column("Bytes", anchor=CENTER, width=100)
@@ -124,9 +123,7 @@ class MainWindow(Tk):
             self.table.column("Request", anchor=CENTER, width=100)
 
             self.table.heading("#0", text="", anchor=CENTER)
-            self.table.heading("Operation_Type",
-                               text="Operation Type",
-                               anchor=CENTER)
+            self.table.heading("op_type", text="Operation Type", anchor=CENTER)
             self.table.heading("Time_before",
                                text="Time before",
                                anchor=CENTER)
@@ -226,8 +223,8 @@ class MainWindow(Tk):
     def render_timeline(self):
         if self.timeline == False:
             self.timeline = True
-            time_len = self.mpi_op_list[len(
-                self.mpi_op_list) - 1].t_before - self.mpi_op_list[0].t_before
+            time_len = self.mpi_op_list[len(self.mpi_op_list) -
+                                        1].before - self.mpi_op_list[0].before
             if time_len > 1000000:
                 ratio = 150
             elif time_len > 100000000:
@@ -236,10 +233,10 @@ class MainWindow(Tk):
                 ratio = 1
             offset = 20
             voffset = 50
-            deb = self.mpi_op_list[0].t_before
+            deb = self.mpi_op_list[0].before
             nb_ra = nb_rank(self.mpi_op_list)
             last_op = []
-            last_time = self.mpi_op_list[len(self.mpi_op_list) - 1].t_before
+            last_time = self.mpi_op_list[len(self.mpi_op_list) - 1].before
 
             self.frame_timeline = Frame(self.main, bd=5, height=400)
             self.frame_timeline.pack(side=TOP,
@@ -265,12 +262,12 @@ class MainWindow(Tk):
                 last_op.append(deb)
             cpt = 0
             for elem in self.mpi_op_list:
-                if elem.operation_type != 'Init':
+                if elem.op_type != 'Init':
                     elem.draw_timeline(deb, self.timeline_canvas, last_op,
                                        offset, voffset, ratio)
                     cpt = cpt + 1
-                    if elem.operation_type != 'Finalize':
-                        last_op[elem.rank] = elem.t_after
+                    if elem.op_type != 'Finalize':
+                        last_op[elem.rank] = elem.after
 
             for i in range(1, nb_ra):
                 self.timeline_canvas.create_line(
