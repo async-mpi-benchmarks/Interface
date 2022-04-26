@@ -223,9 +223,7 @@ class MainWindow(Tk):
             self.timeline = True
             time_len = self.mpi_op_list[len(self.mpi_op_list) -1]["tsc"] - self.mpi_op_list[0]["tsc"]
             if time_len > 1000000:
-                ratio = 150
-            elif time_len > 100000000:
-                ratio = 1000
+                ratio = 15
             else:
                 ratio = 1
             offset = 20
@@ -265,7 +263,7 @@ class MainWindow(Tk):
                     cpt = cpt + 1
                     if elem["type"] != 'MpiFinalize':
                         last_op[elem["current_rank"]] = tsc_after(elem)
-
+                        
             for i in range(1, nb_ra):
                 self.timeline_canvas.create_line(
                     0,
@@ -281,13 +279,15 @@ class MainWindow(Tk):
                                                  anchor='w')
 
             i = 0
-            step = round(self.timeline_canvas.bbox("all")[2] / 10000)
-            if step < 50:
+            if time_len > 1000000:
+                step = 1000
+            else:
                 step = 50
             while i < self.timeline_canvas.bbox("all")[2]:
+                print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
                 self.timeline_canvas.create_text(offset + i,
                                                  5,
-                                                 text=str(i) + "\n|",
+                                                 text=str(i/self.ratio_cy_sec) + "\n|",
                                                  anchor='n')
                 i = i + step
 
