@@ -6,297 +6,66 @@ from tkinter import *
 def tsc_after(elem):
     return elem["tsc"]+elem["duration"]
 
-class Init:
-    op_type = 'Init'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.time = float(string[4])
-        self.rank = ''
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t: ' + str(self.before) + ' real time: ' +
-            str(self.time))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio, '', '',
-                             '', '', '', '', ''))
-        return table
-
-
-class Finalize:
-    op_type = 'Finalize'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.time = float(string[4])
-        self.rank = int(string[6])
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t: ' + str(self.before) + ' real time: ' +
-            str(self.time) + ' rank: ' + str(self.rank))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio, '', '',
-                             self.rank, '', '', '', ''))
-        return table
-
-    def draw_timeline(self, deb, canvas, last_op, offset, voffset, ratio):
-        x0 = offset + (last_op[self.rank] - deb) / ratio
-        y0 = self.rank * 150 + voffset
-        x1 = offset + (self.before - deb) / ratio
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-
-
-class Wait:
-    op_type = 'Wait'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.after = int(string[4])
-        self.rank = int(string[8])
-        self.request = int(string[6])
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t1: ' + str(self.before) + ' t2: ' +
-            str(self.after) + ' rank: ' + str(self.rank) + ' req: ' +
-            str(self.request))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio,
-                             (self.after - deb) / ratio, '', self.rank, '', '',
-                             '', self.request))
-        return table
-
-    def draw_timeline(self, deb, canvas, last_op, offset, voffset, ratio):
-        x0 = offset + (last_op[self.rank] - deb) / ratio
-        y0 = self.rank * 150 + voffset
-        x1 = offset + (self.before - deb) / ratio
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-        x0 = offset + (self.before - deb) / ratio
-        x1 = offset + (self.after - deb) / ratio
-        y0 = y1 + 15
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
-        canvas.create_text(x0 + 3,
-                           y0 + 3,
-                           text=str(self.op_type) + "\n" + "request " +
-                           str(self.request),
+def draw_timeline_text(canvas,elem,x,y):
+    if(elem["type"]=="MpiInit"):
+        return
+    elif(elem["type"]=="MpiFinalize"):
+        return
+    elif(elem["type"]=="MpiWait"):
+        canvas.create_text(x, y,
+                           text=str(elem["type"]) + "\n" + "req: " +
+                           str(elem["req"]),
+                           anchor=NW)
+    elif(elem["type"]=="MpiIrecv"):
+        canvas.create_text(x,y,
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           " partner: " + str(elem["partner_rank"]) + "\n" +
+                           "tag: " + str(elem["tag"]) + " comm: " +
+                           str(elem["comm"]) + "\n req: " +
+                           str(elem["req"]),
+                           anchor=NW)
+    elif(elem["type"]=="MpiRecv"):
+        canvas.create_text(x,y,
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           " partner: " + str(elem["partner_rank"]) + "\n" +
+                           "tag: " + str(elem["tag"]) + " comm: " +
+                           str(elem["comm"]), anchor=NW)
+    elif(elem["type"]=="MpiSend"):
+        canvas.create_text(x,y,
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           " partner: " + str(elem["partner_rank"]) + "\n" +
+                           "tag: " + str(elem["tag"]) + " comm: " +
+                           str(elem["comm"]), anchor=NW)
+    elif(elem["type"]=="MpiIsend"):
+        canvas.create_text(x,y,
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           " partner: " + str(elem["partner_rank"]) + "\n" +
+                           "tag: " + str(elem["tag"]) + " comm: " +
+                           str(elem["comm"]) + "\n req: " +
+                           str(elem["req"]),
                            anchor=NW)
 
 
-class Irecv:
-    op_type = 'Irecv'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.after = int(string[4])
-        self.tag = int(string[16])
-        self.dest = int(string[14])
-        self.rank = int(string[12])
-        self.request = int(string[10])
-        self.comm = int(string[8])
-        self.nb_bytes = int(string[6])
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t1: ' + str(self.before) + ' t2: ' +
-            str(self.after) + " bytes: " + str(self.nb_bytes) + ' tag: ' +
-            str(self.tag) + ' dest: ' + str(self.dest) + ' rank: ' +
-            str(self.rank) + ' req: ' + str(self.request) + ' comm: ' +
-            str(self.comm))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio,
-                             (self.after - deb) / ratio, self.nb_bytes,
-                             self.rank, self.dest, self.tag, self.comm,
-                             self.request))
-        return table
-
-    def draw_timeline(self, deb, canvas, last_op, offset, voffset, ratio):
-        x0 = offset + (last_op[self.rank] - deb) / ratio
-        y0 = self.rank * 150 + voffset
-        x1 = offset + (self.before - deb) / ratio
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-        x0 = offset + (self.before - deb) / ratio
-        x1 = offset + (self.after - deb) / ratio
+def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
+    x0 = offset + (last_op[elem["current_rank"]] - deb) / ratio
+    y0 = elem["current_rank"] * 150 + voffset
+    x1 = offset + (elem["tsc"] - deb) / ratio
+    y1 = y0 + 50
+    canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
+    if(elem["type"] != "MpiInit" and elem["type"] != "MpiFinalize"):
+        x0 = offset + (elem["tsc"] - deb) / ratio
+        x1 = offset + (tsc_after(elem) - deb) / ratio
         y0 = y1 + 15
         y1 = y0 + 50
         canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
-        canvas.create_text(x0 + 3,
-                           y0 + 3,
-                           text=str(self.op_type) + "\n" + str(self.nb_bytes) +
-                           " bytes receiv from " + str(self.dest) + "\n" +
-                           "with tag " + str(self.tag) + " on comm " +
-                           str(self.comm) + "\n with request " +
-                           str(self.request),
-                           anchor=NW)
+        draw_timeline_text(canvas,elem,x0+3,y0+3)
 
-
-class Recv:
-    op_type = 'Recv'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.after = int(string[4])
-        self.tag = int(string[14])
-        self.dest = int(string[12])
-        self.rank = int(string[10])
-        self.comm = int(string[8])
-        self.nb_bytes = int(string[6])
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t1: ' + str(self.before) + ' t2: ' +
-            str(self.after) + " bytes: " + str(self.nb_bytes) + ' tag: ' +
-            str(self.tag) + ' dest: ' + str(self.dest) + ' rank: ' +
-            str(self.rank) + ' comm: ' + str(self.comm))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio,
-                             (self.after - deb) / ratio, self.nb_bytes,
-                             self.rank, self.dest, self.tag, self.comm, ''))
-        return table
-
-    def draw_timeline(self, deb, canvas, last_op, offset, voffset, ratio):
-        x0 = offset + (last_op[self.rank] - deb) / ratio
-        y0 = self.rank * 150 + voffset
-        x1 = offset + (self.before - deb) / ratio
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-        x0 = offset + (self.before - deb) / ratio
-        x1 = offset + (self.after - deb) / ratio
-        y0 = y1 + 15
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
-        canvas.create_text(x0 + 3,
-                           y0 + 3,
-                           text=str(self.op_type) + "\n" + str(self.nb_bytes) +
-                           " bytes receiv from " + str(self.dest) + "\n" +
-                           "with tag " + str(self.tag) + " on comm " +
-                           str(self.comm),
-                           anchor=NW)
-
-
-class Send:
-    op_type = 'Send'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.after = int(string[4])
-        self.tag = int(string[14])
-        self.dest = int(string[12])
-        self.rank = int(string[10])
-        self.comm = int(string[8])
-        self.nb_bytes = int(string[6])
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t1: ' + str(self.before) + ' t2: ' +
-            str(self.after) + " bytes: " + str(self.nb_bytes) + ' tag: ' +
-            str(self.tag) + ' dest: ' + str(self.dest) + ' rank: ' +
-            str(self.rank) + ' comm: ' + str(self.comm))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio,
-                             (self.after - deb) / ratio, self.nb_bytes,
-                             self.rank, self.dest, self.tag, self.comm, ''))
-        return table
-
-    def draw_timeline(self, deb, canvas, last_op, offset, voffset, ratio):
-        x0 = offset + (last_op[self.rank] - deb) / ratio
-        y0 = self.rank * 150 + voffset
-        x1 = offset + (self.before - deb) / ratio
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-        x0 = offset + (self.before - deb) / ratio
-        x1 = offset + (self.after - deb) / ratio
-        y0 = y1 + 15
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
-        canvas.create_text(x0 + 3,
-                           y0 + 3,
-                           text=str(self.op_type) + "\n" + str(self.nb_bytes) +
-                           " bytes sent to " + str(self.dest) + "\n" +
-                           "with tag " + str(self.tag) + " on comm " +
-                           str(self.comm),
-                           anchor=NW)
-
-
-class Isend:
-    op_type = 'Isend'
-
-    def __init__(self, string):
-        self.before = int(string[2])
-        self.after = int(string[4])
-        self.tag = int(string[16])
-        self.dest = int(string[14])
-        self.rank = int(string[12])
-        self.request = int(string[10])
-        self.comm = int(string[8])
-        self.nb_bytes = int(string[6])
-
-    def print(self):
-        print(
-            str(self.op_type) + ' t1: ' + str(self.before) + ' t2: ' +
-            str(self.after) + " bytes: " + str(self.nb_bytes) + ' tag: ' +
-            str(self.tag) + ' dest: ' + str(self.dest) + ' rank: ' +
-            str(self.rank) + ' req: ' + str(self.request) + ' comm: ' +
-            str(self.comm))
-
-    def table(self, table, deb, ratio):
-        table.insert(parent='',
-                     index='end',
-                     values=(self.op_type, (self.before - deb) / ratio,
-                             (self.after - deb) / ratio, self.nb_bytes,
-                             self.rank, self.dest, self.tag, self.comm,
-                             self.request))
-        return table
-
-    def draw_timeline(self, deb, canvas, last_op, offset, voffset, ratio):
-        x0 = offset + (last_op[self.rank] - deb) / ratio
-        y0 = self.rank * 150 + voffset
-        x1 = offset + (self.before - deb) / ratio
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-        x0 = offset + (self.before - deb) / ratio
-        x1 = offset + (self.after - deb) / ratio
-        y0 = y1 + 15
-        y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
-        canvas.create_text(x0 + 3,
-                           y0 + 3,
-                           text=str(self.op_type) + "\n" + str(self.nb_bytes) +
-                           " bytes sent to " + str(self.dest) + "\n" +
-                           "with tag " + str(self.tag) + " on comm " +
-                           str(self.comm) + "\nwith request " +
-                           str(self.request),
-                           anchor=NW)
-
-def table(elem,table, deb, ratio):
+def draw_table(elem,table, deb, ratio):
     if(elem["type"]=="MpiInit"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
-                             '', '', '', '', ''))
+                             elem["current_rank"], '', '', '', ''))
     elif(elem["type"]=="MpiFinalize"):
         table.insert(parent='',
                      index='end',
@@ -309,14 +78,32 @@ def table(elem,table, deb, ratio):
                              (tsc_after(elem) - deb) / ratio, '', elem["current_rank"], '', '',
                              '', elem["req"]))
     elif(elem["type"]=="MpiIrecv"):
-
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
+                             elem["req"]))
     elif(elem["type"]=="MpiRecv"):
-
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],''))
     elif(elem["type"]=="MpiSend"):
-
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],''))
     elif(elem["type"]=="MpiIsend"):
-
-
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
+                             elem["req"]))
+    return table
 
 def make_pair_isw(mpi_operation):
     pair_isw = []
@@ -476,13 +263,9 @@ def ratio_cycle2sec(data):
 def json_reader(name):
     f = open(name)
     data = json.load(f)
+    data.sort(key = lambda x: x['tsc'])
     return data
 
 def test_reader(data):
     for elem in data:
         print(elem)
-
-data = json_reader2("./data/new_traces.json")
-data.sort(key = lambda x: x['tsc'])
-test_reader(data)
-print(ratio_cycle2sec(data))
