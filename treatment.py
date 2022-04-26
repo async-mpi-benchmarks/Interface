@@ -4,7 +4,6 @@ from operator import attrgetter
 from tkinter import *
 
 def tsc_after(elem):
-    print(elem)
     return elem["tsc"]+elem["duration"]
 
 def draw_timeline_text(canvas,elem,x,y):
