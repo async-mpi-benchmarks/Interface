@@ -250,7 +250,7 @@ def total_asynchronisme(liste):
 
 
 def ratio_cycle2sec(data):
-    if data[0]["type"] != 'MpiInit' && data[0]["type"]!='MpiInitThread':
+    if data[0]["type"] != 'MpiInit' and data[0]["type"]!='MpiInitThread':
         print("Error the first MPI operation is not an Init")
     if data[len(data) - 1]["type"] != 'MpiFinalize':
         print("Error the last MPI operation is not a Finalize")
