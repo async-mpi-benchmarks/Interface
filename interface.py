@@ -14,7 +14,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 class MainWindow(Tk):
 
     def __init__(self):
-
         Tk.__init__(self)
         self.title('MPI Trace Analyzer')
         self['bg'] = 'white'
@@ -59,7 +58,6 @@ class MainWindow(Tk):
                                                          ("all files", "*.*")))
         if filename:
             self.mpi_op_list = json_reader(filename)
-            self.mpi_op_list = sorted(self.mpi_op_list, key=lambda x: x.before)
             self.ratio_cy_sec = ratio_cycle2sec(self.mpi_op_list)
 
     def render_info(self):
@@ -87,7 +85,7 @@ class MainWindow(Tk):
     def render_operation_table(self):
         if self.operation_table == False:
             self.operation_table = True
-            deb = self.mpi_op_list[0].before
+            deb = self.mpi_op_list[0]["tsc"]
             self.render_table = Frame(self.main, bd=5)
             self.render_table.pack(side=TOP, anchor=W, padx=2, pady=2)
 
@@ -136,7 +134,7 @@ class MainWindow(Tk):
             self.table.heading("Request", text="Request", anchor=CENTER)
 
             for elem in self.mpi_op_list:
-                self.table = elem.table(self.table, deb, self.ratio_cy_sec)
+                self.table = draw_table(elem,self.table, deb, self.ratio_cy_sec)
 
             self.table.pack()
             self.root.configure(scrollregion=self.root.bbox("all"))
@@ -181,10 +179,10 @@ class MainWindow(Tk):
             fig = plt.figure()
             ax1 = fig.add_subplot()
             if self.var_deb.get():
-                ax1.set_xlabel("Number of send")
+                ax1.set_xlabel("Send/Isend ID")
                 ax1.set_ylabel('Throughput MB/s')
             if self.var_cov.get():
-                ax1.set_xlabel("Number of couple Isend/Irecv Wait")
+                ax1.set_xlabel("ID of couple Isend/Irecv Wait")
                 ax1.set_ylabel('Coverage in %')
             if (len(self.mpi_op_list) < 100):
                 ax1.bar(self.x, self.y)
@@ -223,8 +221,7 @@ class MainWindow(Tk):
     def render_timeline(self):
         if self.timeline == False:
             self.timeline = True
-            time_len = self.mpi_op_list[len(self.mpi_op_list) -
-                                        1].before - self.mpi_op_list[0].before
+            time_len = self.mpi_op_list[len(self.mpi_op_list) -1]["tsc"] - self.mpi_op_list[0]["tsc"]
             if time_len > 1000000:
                 ratio = 150
             elif time_len > 100000000:
@@ -233,10 +230,10 @@ class MainWindow(Tk):
                 ratio = 1
             offset = 20
             voffset = 50
-            deb = self.mpi_op_list[0].before
+            deb = self.mpi_op_list[0]["tsc"]
             nb_ra = nb_rank(self.mpi_op_list)
             last_op = []
-            last_time = self.mpi_op_list[len(self.mpi_op_list) - 1].before
+            last_time = self.mpi_op_list[len(self.mpi_op_list) - 1]["tsc"]
 
             self.frame_timeline = Frame(self.main, bd=5, height=400)
             self.frame_timeline.pack(side=TOP,
@@ -262,12 +259,12 @@ class MainWindow(Tk):
                 last_op.append(deb)
             cpt = 0
             for elem in self.mpi_op_list:
-                if elem.op_type != 'Init':
-                    elem.draw_timeline(deb, self.timeline_canvas, last_op,
+                if elem["type"] != 'MpiInit':
+                    draw_timeline(elem,deb, self.timeline_canvas, last_op,
                                        offset, voffset, ratio)
                     cpt = cpt + 1
-                    if elem.op_type != 'Finalize':
-                        last_op[elem.rank] = elem.after
+                    if elem["type"] != 'MpiFinalize':
+                        last_op[elem["current_rank"]] = tsc_after(elem)
 
             for i in range(1, nb_ra):
                 self.timeline_canvas.create_line(

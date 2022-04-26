@@ -1,0 +1,112 @@
+[
+  {
+    "type": "MpiInit",
+    "current_rank": 0,
+    "tsc": 12634153971136,
+    "time": 1650635789.327171
+  },
+  {
+    "type": "MpiSend",
+    "current_rank": 0,
+    "partner_rank": 1,
+    "nb_bytes": 800,
+    "comm": 0,
+    "tag": 123,
+    "tsc": 12634189815834,
+    "duration": 51918
+  },
+  {
+    "type": "MpiRecv",
+    "current_rank": 0,
+    "partner_rank": 1,
+    "nb_bytes": 800,
+    "comm": 0,
+    "tag": 456,
+    "tsc": 12634189873290,
+    "duration": 16930
+  },
+  {
+    "type": "MpiIrecv",
+    "current_rank": 0,
+    "partner_rank": 1,
+    "nb_bytes": 800,
+    "comm": 0,
+    "req": 2,
+    "tag": 789,
+    "tsc": 12634189893810,
+    "duration": 1772
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 0,
+    "req": 0,
+    "tsc": 12634189903986,
+    "duration": 716122
+  },
+  {
+    "type": "MpiFinalize",
+    "current_rank": 0,
+    "tsc": 12634195410974,
+    "time": 1650635789.344438
+  }
+,
+
+  {
+    "type": "MpiInit",
+    "current_rank": 1,
+    "tsc": 12634155705674,
+    "time": 1650635789.327894
+  },
+  {
+    "type": "MpiIrecv",
+    "current_rank": 1,
+    "partner_rank": 0,
+    "nb_bytes": 800,
+    "comm": 0,
+    "req": 2,
+    "tag": 123,
+    "tsc": 12634189601394,
+    "duration": 10332
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 1,
+    "req": 0,
+    "tsc": 12634189636074,
+    "duration": 229818
+  },
+  {
+    "type": "MpiIsend",
+    "current_rank": 1,
+    "partner_rank": 0,
+    "nb_bytes": 800,
+    "comm": 0,
+    "req": 2,
+    "tag": 456,
+    "tsc": 12634189870646,
+    "duration": 7166
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 1,
+    "req": 0,
+    "tsc": 12634190597922,
+    "duration": 2854
+  },
+  {
+    "type": "MpiSend",
+    "current_rank": 1,
+    "partner_rank": 0,
+    "nb_bytes": 800,
+    "comm": 0,
+    "tag": 789,
+    "tsc": 12634190612054,
+    "duration": 7460
+  },
+  {
+    "type": "MpiFinalize",
+    "current_rank": 1,
+    "tsc": 12634195311208,
+    "time": 1650635789.344396
+  }
+]
