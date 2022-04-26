@@ -4,6 +4,7 @@ from operator import attrgetter
 from tkinter import *
 
 def tsc_after(elem):
+    print(elem)
     return elem["tsc"]+elem["duration"]
 
 def draw_timeline_text(canvas,elem,x,y):
@@ -44,7 +45,6 @@ def draw_timeline_text(canvas,elem,x,y):
                            str(elem["comm"]) + "\n req: " +
                            str(elem["req"]),
                            anchor=NW)
-
 
 def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
     x0 = offset + (last_op[elem["current_rank"]] - deb) / ratio
@@ -251,7 +251,7 @@ def total_asynchronisme(liste):
 
 
 def ratio_cycle2sec(data):
-    if data[0]["type"] != 'MpiInit':
+    if data[0]["type"] != 'MpiInit' && data[0]["type"]!='MpiInitThread':
         print("Error the first MPI operation is not an Init")
     if data[len(data) - 1]["type"] != 'MpiFinalize':
         print("Error the last MPI operation is not a Finalize")
