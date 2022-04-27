@@ -283,13 +283,13 @@ class MainWindow(Tk):
                 step = 1000
             else:
                 step = 50
-            while i < self.timeline_canvas.bbox("all")[2]:
-                print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
-                self.timeline_canvas.create_text(offset + i,
-                                                 5,
-                                                 text=str(i/self.ratio_cy_sec) + "\n|",
-                                                 anchor='n')
-                i = i + step
+            #while i < self.timeline_canvas.bbox("all")[2]:
+            #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
+            #    self.timeline_canvas.create_text(offset + i,
+            #                                     5,
+            #                                     text=str(i/self.ratio_cy_sec) + "\n|",
+            #                                     anchor='n')
+            #    i = i + step
 
             self.timeline_canvas.config(
                 xscrollcommand=self.timeline_scrollx.set,
