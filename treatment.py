@@ -2,6 +2,16 @@ import re
 import json
 from operator import attrgetter
 from tkinter import *
+import threading
+
+MPI_SEND_OP = ['MpiIsend' , 'MpiSend']
+MPI_RECV_OP = ['MpiRecv' , 'MpiIrecv']
+MPI_WAIT_OP = ['MpiWait']
+MPI_ASYNC_OP = ['MpiIsend' , 'MpiIrecv']
+MPI_SYNC_OP = ['MpiSend' , 'MpiRecv', 'MpiBarrier']
+MPI_INIT_OP = ['MpiInit' , 'MpiInitThread']
+MPI_BARRIER_OP = ['MpiBarrier' , 'MpiIbarrier']
+MPI_COLL_OP = []
 
 def tsc_after(elem):
     return elem["tsc"]+elem["duration"]
@@ -56,7 +66,7 @@ def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
         draw_timeline_text(canvas,elem,x0+3,y0+3)
 
 def draw_table(elem,table, deb, ratio):
-    if(elem["type"]=="MpiInit"):
+    if(elem["type"] in MPI_INIT_OP):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
@@ -104,19 +114,16 @@ def make_pair_isw(mpi_operation):
     pair_isw = []
     for i in range(0, len(mpi_operation)):
         for j in range(i, len(mpi_operation)):
-            if ((mpi_operation[i]["type"] == 'MpiIsend') or
-                (mpi_operation[i]["type"]
-                 == 'MpiIrecv')) and (mpi_operation[j]["type"] == 'MpiWait'):
-                if (mpi_operation[i]["req"] == mpi_operation[j]["req"]) and (
-                        mpi_operation[i]["current_rank"] == mpi_operation[j]["current_rank"]):
-                    pair_isw.append(
-                        pair_isend_wait(mpi_operation[i], mpi_operation[j]))
+            if (((mpi_operation[i]["type"] in MPI_ASYNC_OP) and (mpi_operation[j]["type"] in MPI_WAIT_OP)) 
+                or ((mpi_operation[j]["type"] in MPI_ASYNC_OP) and (mpi_operation[i]["type"] in MPI_WAIT_OP))):
+                if (mpi_operation[i]["req"] == mpi_operation[j]["req"]) and (mpi_operation[i]["current_rank"] == mpi_operation[j]["current_rank"]):
+                    pair_isw.append(pair_async_wait(mpi_operation[i], mpi_operation[j]))
                     break
 
     return pair_isw
 
 
-class pair_isend_wait:
+class pair_async_wait:
 
     def coverage(self):
         cost_op = tsc_after(self.op1) - self.op1["tsc"] + tsc_after(self.op2) - self.op2["tsc"]
@@ -143,37 +150,49 @@ class pair_send_receiv:
         self.send = op1
         self.receiv = op2
         self.time = abs(tsc_after(self.receiv) - self.send["tsc"]) / ratio
-        self.debit = self.send["nb_bytes"] / self.time
-
+        self.debit = float(self.send["nb_bytes"]) / float(self.time)
+    
     def print(self):
         print(self.send)
         print(self.receiv)
-        print("Debit: " + str(self.debit))
+        print("Nb bytes: " + str(self.send["nb_bytes"]))
         print("Time: " + str(self.time))
+        print("Debit: " + str(self.debit))
+        
 
 
 def make_pair_sr(mpi_operation, ratio):
     pair_sr = []
+    marked_index = []
     for op1 in mpi_operation:
-        for op2 in mpi_operation[mpi_operation.index(op1):]:
-            if ((op1["type"] == 'MpiIsend') or
-                (op1["type"] == 'MpiSend')) and ((op2["type"] == 'MpiRecv') or
-                                              (op2["type"] == 'MpiIrecv')):
-                if (op1["tag"] == op2["tag"]) and (op1["partner_rank"] == op2["current_rank"]) and (
-                        op1["current_rank"] == op2["partner_rank"]) and (op1["comm"] == op2["comm"]) and (
-                            op1["nb_bytes"] == op2["nb_bytes"]):
+        index_op1 = mpi_operation.index(op1)
+        
+        if((op1["type"] in MPI_INIT_OP) or op1["type"]=="MpiFinalize"):
+            continue
+        if(index_op1 in marked_index):
+            continue
+        
+        for op2 in mpi_operation[index_op1:]:
+            index_op2 = mpi_operation.index(op2)
+            
+            if((op2["type"] in MPI_INIT_OP) or op1["type"]=="MpiFinalize"):
+                continue
+            if(index_op2 in marked_index):
+                continue
+            
+            if ((op1["type"] in MPI_SEND_OP) and (op2["type"] in MPI_RECV_OP)):
+                if ((op1["tag"] == op2["tag"]) and (op1["partner_rank"] == op2["current_rank"]) and (op1["current_rank"] == op2["partner_rank"]) and (op1["comm"] == op2["comm"])):
                     pair_sr.append(pair_send_receiv(op1, op2, ratio))
+                    marked_index.append(index_op1)
+                    marked_index.append(index_op2)
                     break
-            if ((op2["type"] == 'MpiIsend') or
-                (op2["type"] == 'MpiSend')) and ((op1["type"] == 'MpiRecv') or
-                                              (op1["type"] == 'MpiIrecv')):
-                if (op2["tag"] == op1["tag"]) and (op2["partner_rank"] == op1["current_rank"]) and (
-                        op2["current_rank"] == op1["partner_rank"]) and (op2["comm"] == op1["comm"]) and (
-                            op2["nb_bytes"] == op1["nb_bytes"]):
+            if ((op2["type"] in MPI_SEND_OP)) and ((op1["type"] in MPI_RECV_OP)):
+                if ((op2["tag"] == op1["tag"]) and (op2["partner_rank"] == op1["current_rank"]) and (op2["current_rank"] == op1["partner_rank"]) and (op2["comm"] == op1["comm"])):
                     pair_sr.append(pair_send_receiv(op2, op1, ratio))
+                    marked_index.append(index_op1)
+                    marked_index.append(index_op2)
                     break
     return pair_sr
-
 
 def gather_info(liste_mpi_op, liste_isw):
     info = [0] * 4
@@ -181,7 +200,7 @@ def gather_info(liste_mpi_op, liste_isw):
     nb_message = 0
     for elem in liste_mpi_op:
         max_rank = max(max_rank, elem["current_rank"])
-        if elem["type"] == 'MpiSend' or elem["type"] == 'MpiIsend':
+        if elem["type"] in MPI_SEND_OP:
             nb_message = nb_message + 1
 
     info[0] = max_rank + 1
@@ -194,8 +213,7 @@ def gather_info(liste_mpi_op, liste_isw):
         if elem.coverage < 100:
             nb_bad_async = nb_bad_async + 1
         compu_cost = compu_cost + (elem.op2["tsc"] - tsc_after(elem.op1))
-        mpi_cost = mpi_cost + (tsc_after(elem.op1) - elem.op1["tsc"] +
-                               tsc_after(elem.op2) - elem.op2["tsc"])
+        mpi_cost = mpi_cost + (tsc_after(elem.op1) - elem.op1["tsc"] + tsc_after(elem.op2) - elem.op2["tsc"])
 
     if len(liste_isw):
         info[2] = nb_bad_async
@@ -205,6 +223,46 @@ def gather_info(liste_mpi_op, liste_isw):
         info[3] = 0
     return info
 
+def gather_process_info(liste_mpi_op,nb_rank):
+    process_info = [{} for i in range(0,nb_rank)]
+
+    for i in range(0,nb_rank):
+        process_info[i]["nb_message_sent"] = 0
+        process_info[i]["nb_message_recv"] = 0
+        process_info[i]["nb_barrier"] = 0
+        process_info[i]["nb_async_op"] = 0
+        process_info[i]["nb_sync_op"] = 0
+        process_info[i]["list_partner"] = []
+        process_info[i]["nb_partner"] = 0
+
+    for elem in liste_mpi_op:
+        erank = elem["current_rank"]
+        if(elem["type"] in MPI_SEND_OP):
+            process_info[erank]["nb_message_sent"] = process_info[erank]["nb_message_sent"] + 1
+        if(elem["type"] in MPI_RECV_OP):
+            process_info[erank]["nb_message_recv"] = process_info[erank]["nb_message_recv"] + 1
+        if(elem["type"] in MPI_BARRIER_OP):
+            process_info[erank]["nb_barrier"] = process_info[erank]["nb_barrier"] + 1
+        if(elem["type"] in MPI_ASYNC_OP):
+            process_info[erank]["nb_async_op"] = process_info[erank]["nb_async_op"] + 1
+        elif(elem["type"] in MPI_SYNC_OP):
+            process_info[erank]["nb_sync_op"] = process_info[erank]["nb_sync_op"] + 1
+        if((elem["type"] in MPI_SEND_OP) or (elem["type"] in MPI_RECV_OP) or (elem["type"] in MPI_COLL_OP)):
+            if(elem["partner_rank"] not in process_info[erank]["list_partner"]):
+                process_info[erank]["list_partner"].append(elem["partner_rank"])
+                process_info[erank]["nb_partner"] = process_info[erank]["nb_partner"] + 1
+        print(process_info[erank])
+    list_string = []
+    for i in range(0,nb_rank):
+        list_string.append("Messages sent:\t\t" + str(process_info[i]["nb_message_sent"]) + "\n" +
+            "Messages received:\t" + str(process_info[i]["nb_message_recv"]) + "\n" +
+            "Barriers:\t\t\t" + str(process_info[i]["nb_barrier"]) + "\n" +
+            "Async operation:\t\t" + str(process_info[i]["nb_async_op"]) + "\n" +
+            "Sync operation:\t\t" + str(process_info[i]["nb_sync_op"]) + "\n" +
+            "Number of partner:\t\t" + str(process_info[i]["nb_partner"]) + "\n" +
+            "Partner list:\t\t" + str(process_info[i]["list_partner"]) + "\n"
+            )
+    return list_string
 
 def nb_rank(liste):
     max_ = 0
@@ -216,7 +274,7 @@ def nb_rank(liste):
 def nb_message(liste):
     cpt = 0
     for elem in liste:
-        if elem["type"] == 'MpiSend' or elem["type"] == 'MpiIsend':
+        if elem["type"] in MPI_SEND_OP:
             cpt = cpt + 1
     return cpt
 
@@ -246,7 +304,7 @@ def total_asynchronisme(liste):
 
 
 def ratio_cycle2sec(data):
-    if data[0]["type"] != 'MpiInit' and data[0]["type"]!='MpiInitThread':
+    if data[0]["type"] not in MPI_INIT_OP:
         print("Error the first MPI operation is not an Init")
     if data[len(data) - 1]["type"] != 'MpiFinalize':
         print("Error the last MPI operation is not a Finalize")

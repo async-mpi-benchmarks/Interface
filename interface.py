@@ -10,7 +10,6 @@ from tkinter import filedialog
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-
 class MainWindow(Tk):
 
     def __init__(self):
@@ -67,16 +66,19 @@ class MainWindow(Tk):
             self.frame_info.pack(side=TOP, anchor=NW, padx=2, pady=2)
             self.pair_isw = make_pair_isw(self.mpi_op_list)
             info = gather_info(self.mpi_op_list, self.pair_isw)
-            text = "Number of rank: " + str(
+            text = "GLOBAL INFO: \n\n"+"Number of process: " + str(
                 info[0]) + "\n" + "Number of message sent: " + str(
                     info[1]) + "\n" + "Number of MPI function: " + str(
                         len(self.mpi_op_list)
                     ) + "\n" + "Number of bad async message: " + str(
-                        info[2]) + "\n" + "% of mpi operation " + str(
-                            round(100 - info[3], 2)) + "%"
+                        info[2]) + "\n" + "% of mpi operation " + str(round(100 - info[3], 2)) + "%\n"
+            
+            process_info = gather_process_info(self.mpi_op_list,info[0])
+            for i in range(0,info[0]):
+                text = text + "___________________________________________\n Process " +str(i)+":\n\n" + process_info[i]
 
             self.info_text = Label(self.frame_info, text=text)
-            self.info_text.pack()
+            self.info_text.pack(side=LEFT,anchor='w')
             self.root.configure(scrollregion=self.root.bbox("all"))
         else:
             self.info = False
@@ -318,7 +320,6 @@ class MainWindow(Tk):
         self.menu_bar.add_cascade(label="Render", menu=self.menu_render)
 
         self.config(menu=self.menu_bar)
-
 
 window = MainWindow()
 window.mainloop()
