@@ -57,7 +57,7 @@ def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
     x1 = offset + (elem["tsc"] - deb) / ratio
     y1 = y0 + 50
     canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
-    if(elem["type"] != "MpiInit" and elem["type"] != "MpiFinalize"):
+    if(elem["type"] not in MPI_INIT_OP and elem["type"] != "MpiFinalize"):
         x0 = offset + (elem["tsc"] - deb) / ratio
         x1 = offset + (tsc_after(elem) - deb) / ratio
         y0 = y1 + 15

@@ -259,7 +259,7 @@ class MainWindow(Tk):
                 last_op.append(deb)
             cpt = 0
             for elem in self.mpi_op_list:
-                if elem["type"] != 'MpiInit' and elem["type"] != 'MpiInitThread':
+                if elem["type"] not in MPI_INIT_OP:
                     draw_timeline(elem,deb, self.timeline_canvas, last_op,
                                        offset, voffset, ratio)
                     cpt = cpt + 1
