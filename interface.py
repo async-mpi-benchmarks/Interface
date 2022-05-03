@@ -54,12 +54,12 @@ class global_info_window(Tk):
         
 class Table_window(Tk):
     
-    def __init__(self,mpi_op_list):
+    def __init__(self,mpi_op_list,ratio_cy_sec):
         Tk.__init__(self)
         self.mpi_op_list=mpi_op_list
         self.title('Operation MPI table ')
         self.geometry('950x250')
-        self.ratio_cy_sec = 1
+        self.ratio_cy_sec = ratio_cy_sec
         self.root = Canvas(self, bg='white')
         self.root.pack(side=TOP, anchor=NW, expand=True, fill=BOTH)
         self.root_scrollx = Scrollbar(self.root,
@@ -134,84 +134,96 @@ class Table_window(Tk):
  
 class Timeline_window(Tk):
     
-    def __init__(self,mpi_op_list):
+    def __init__(self,mpi_op_list,ratio_cy_sec):
         Tk.__init__(self)
         self.mpi_op_list=mpi_op_list
         self.title('Operation MPI table ')
-        self.geometry('950x250')
-        self.ratio_cy_sec = 1
-        self.root = Canvas(self, bg='white')
-        self.root.pack(side=TOP, anchor=NW, expand=True, fill=BOTH)
-        self.root_scrollx = Scrollbar(self.root,
-                                      orient='horizontal',
-                                      command=self.root.xview)
-        self.root_scrollx.pack(side=BOTTOM, fill=BOTH)
-        self.root_scrolly = Scrollbar(self.root,
-                                      orient='vertical',
-                                      command=self.root.yview)
-        self.root_scrolly.pack(side=RIGHT, fill=BOTH)
-
-
-        self.root.config(yscrollcommand=self.root_scrolly.set,xscrollcommand=self.root_scrollx.set)
-        self.main = Frame(self.root, bg="white")
-        self.root.configure(scrollregion=self.root.bbox("all"))
-        self.root.create_window((4, 4), window=self.main, anchor="nw")
-        self.main.bind("<Configure>", self.onFrameConfigure)
-        self.render_operation_table()
+        self.geometry('1045x400')
+        self.ratio_cy_sec = ratio_cy_sec
+        self.render_timeline()
         
     def onFrameConfigure(self, event):
         self.root.configure(scrollregion=self.root.bbox("all"))
 
-    def render_operation_table(self):
+    def render_timeline(self):
 
-        deb = self.mpi_op_list[0]["tsc"]
-        self.render_table = Frame(self.main, bd=5)
-        self.render_table.pack(side=TOP, anchor=W, padx=2, pady=2)
-        self.table_scrolly = Scrollbar(self.render_table,
-                                       orient='vertical')
-        self.table_scrolly.pack(side=RIGHT, fill=Y)
-        self.table_scrollx = Scrollbar(self.render_table,
-                                           orient='horizontal')
-        self.table_scrollx.pack(side=BOTTOM, fill=X)
-        self.table = ttk.Treeview(self.render_table,
-                                      yscrollcommand=self.table_scrolly.set,
-                                      xscrollcommand=self.table_scrollx.set)
-                                     
+            time_len = self.mpi_op_list[len(self.mpi_op_list) -1]["tsc"] - self.mpi_op_list[0]["tsc"]
+            if time_len > 1000000:
+                ratio = 15
+            else:
+                ratio = 1
+            
+            offset = 20
+            voffset = 50
+            deb = self.mpi_op_list[0]["tsc"]
+            nb_ra = nb_rank(self.mpi_op_list)
+            last_op = []
+            last_time = self.mpi_op_list[len(self.mpi_op_list) - 1]["tsc"]
+            self.frame_timeline = Frame(self, bd=5, height=400)
+            self.frame_timeline.pack(fill=BOTH,expand=True)
+            self.timeline_canvas = Canvas(self.frame_timeline,
+                                          width=1000)
 
-        self.table.pack()
-        self.table_scrolly.config(command=self.table.yview)
-        self.table['columns'] = ('op_type', 'Time_before', 'Time_after',
-                                    'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
-                                    'Request')
+            self.timeline_scrollx = Scrollbar(self.frame_timeline,
+                                              orient='horizontal')
+            self.timeline_scrollx.pack(side=BOTTOM, fill=BOTH)
+            self.timeline_scrollx.config(command=self.timeline_canvas.xview)
 
-        self.table.column("#0", width=0, stretch=NO)
-        self.table.column("op_type", anchor=CENTER, width=120)
-        self.table.column("Time_before", anchor=CENTER, width=100)
-        self.table.column("Time_after", anchor=CENTER, width=100)
-        self.table.column("Bytes", anchor=CENTER, width=100)
-        self.table.column("Rank", anchor=CENTER, width=100)
-        self.table.column("Partner", anchor=CENTER, width=100)
-        self.table.column("Tag", anchor=CENTER, width=100)
-        self.table.column("Comm", anchor=CENTER, width=100)
-        self.table.column("Request", anchor=CENTER, width=100)
-        self.table.heading("#0", text="", anchor=CENTER)
-        self.table.heading("op_type", text="Operation Type", anchor=CENTER)
-        self.table.heading("Time_before",
-                            text="Time before",
-                            anchor=CENTER)
-        self.table.heading("Time_after", text="Time after", anchor=CENTER)
-        self.table.heading("Bytes", text="Bytes", anchor=CENTER)
-        self.table.heading("Rank", text="Rank", anchor=CENTER)
-        self.table.heading("Partner", text="Partner", anchor=CENTER)
-        self.table.heading("Tag", text="Tag", anchor=CENTER)
-        self.table.heading("Comm", text="Comm", anchor=CENTER)
-        self.table.heading("Request", text="Request", anchor=CENTER)
+            self.timeline_scrolly = Scrollbar(self.frame_timeline,
+                                              orient='vertical')
+            self.timeline_scrolly.pack(side=RIGHT, fill=BOTH)
+            self.timeline_scrolly.config(command=self.timeline_canvas.yview)
 
-        for elem in self.mpi_op_list:
-            self.table = draw_table(elem,self.table, deb, self.ratio_cy_sec)
-            self.table.pack()
-            self.root.configure(scrollregion=self.root.bbox("all"))
+            for i in range(0, nb_ra):
+                last_op.append(deb)
+            cpt = 0
+            for elem in self.mpi_op_list:
+                if elem["type"] != 'MpiInit' and elem["type"] != 'MpiInitThread':
+                    draw_timeline(elem,deb, self.timeline_canvas, last_op,
+                                       offset, voffset, ratio)
+                    cpt = cpt + 1
+                    if elem["type"] != 'MpiFinalize':
+                        last_op[elem["current_rank"]] = tsc_after(elem)
+                        
+            for i in range(1, nb_ra):
+                self.timeline_canvas.create_line(
+                    0,
+                    i * 130 + voffset,
+                    self.timeline_canvas.bbox("all")[2],
+                    i * 130 + voffset,
+                    dash=(4, 4))
 
+            for i in range(0, nb_ra):
+                self.timeline_canvas.create_text(0,
+                                                 70 + 140 * i,
+                                                 text=str(i),
+                                                 anchor='w')
+
+            i = 0
+            if time_len > 1000000:
+                step = 1000
+            else:
+                step = 50
+            #while i < self.timeline_canvas.bbox("all")[2]:
+            #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
+            #    self.timeline_canvas.create_text(offset + i,
+            #                                     5,
+            #                                     text=str(i/self.ratio_cy_sec) + "\n|",
+            #                                     anchor='n')
+            #    i = i + step
+
+            self.timeline_canvas.config(
+                xscrollcommand=self.timeline_scrollx.set,
+                yscrollcommand=self.timeline_scrolly.set,
+                height=nb_ra * 150 + voffset,
+                scrollregion=self.timeline_canvas.bbox("all"))
+            self.timeline_canvas.pack(fill=BOTH, expand=True)
+            self.timeline_canvas.bind('<Configure>',self.resize)
+
+    def resize(self,event):
+        w,h = event.width,event.height
+        self.timeline_canvas.config(width=w-50,height=h-50)
+        
 
 class MainWindow(Tk):
 
@@ -223,6 +235,7 @@ class MainWindow(Tk):
         self.resizable(False,False)
         self.load=False
         self.create_button()
+        self.ratio_cy_sec = 1
         
 
     def global_info_window(self):
@@ -230,11 +243,15 @@ class MainWindow(Tk):
             win=global_info_window(self.mpi_op_list)
             win.mainloop()
 
-    def Table_window(self):
+    def table_window(self):
         if self.load:
-            win=Table_window(self.mpi_op_list)
+            win=Table_window(self.mpi_op_list,self.ratio_cy_sec)
             win.mainloop()
 
+    def timeline_window(self):
+        if self.load:
+            win=Timeline_window(self.mpi_op_list,self.ratio_cy_sec)
+            win.mainloop()
 
     def browseFiles(self):
         filename = filedialog.askopenfilename(initialdir=".",
@@ -299,9 +316,15 @@ class MainWindow(Tk):
         btn = Button(self,width=30,height=3,text="Load trace", command=self.browseFiles)
         btn.grid(row=1,column=1,rowspan=1,columnspan=2,sticky='ew')
         Button(self,width=15,height=3 ,text='Global info',command=self.global_info_window).grid(row=2,column=1)
-        Button(self,width=15,height=3, text='Table ',command=self.Table_window).grid(row=2,column=2)
-        Button(self,width=15,height=3, text='Plot',command=self.plot_debit).grid(row=3,column=1)
-        Button(self,width=15,height=3, text='Timeline').grid(row=3,column=2)
+        Button(self,width=15,height=3, text='Table ',command=self.table_window).grid(row=2,column=2)
+        menu_button=Menubutton(self,width=15,height=3,text='Plot',relief='raised')
+        menu_button.grid(row=3,column=1,sticky=N+S+E+W)
+        menu_plot=Menu(menu_button,tearoff=0) 
+        menu_plot.add_command(label="Plot throughput",command=self.plot_debit)
+        menu_plot.add_command(label="Plot coverage",command=self.plot_coverage)
+        menu_button.config(menu=menu_plot)
+
+        Button(self,width=15,height=3, text='Timeline',command=self.timeline_window).grid(row=3,column=2)
 
 
 
