@@ -52,62 +52,67 @@ def draw_timeline_text(canvas,elem,x,y):
                            anchor=NW)
 
 def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
-    x0 = offset + (last_op[elem["current_rank"]] - deb) / ratio
+    x0 = offset + (last_op[elem["current_rank"]] - deb) / float(ratio)
     y0 = elem["current_rank"] * 150 + voffset
-    x1 = offset + (elem["tsc"] - deb) / ratio
+    x1 = offset + (elem["tsc"] - deb) / float(ratio)
     y1 = y0 + 50
     canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
     if(elem["type"] not in MPI_INIT_OP and elem["type"] != "MpiFinalize"):
-        x0 = offset + (elem["tsc"] - deb) / ratio
-        x1 = offset + (tsc_after(elem) - deb) / ratio
+        x0 = offset + (elem["tsc"] - deb) / float(ratio)
+        x1 = offset + (tsc_after(elem) - deb) / float(ratio)
         y0 = y1 + 15
         y1 = y0 + 50
         canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
         draw_timeline_text(canvas,elem,x0+3,y0+3)
 
 def draw_table(elem,table, deb, ratio):
-    if(elem["type"] in MPI_INIT_OP):
+    if(elem["type"] in "MpiInit"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
-                             elem["current_rank"], '', '', '', ''))
+                             elem["current_rank"], '', '', '', '','',''))
+    elif(elem["type"] in "MpiInitThread"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
+                             elem["current_rank"], '', '', '', '',elem['required_thread_lvl'],elem['provided_thread_lvl']))
     elif(elem["type"]=="MpiFinalize"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
-                             elem["current_rank"], '', '', '', ''))
+                             elem["current_rank"], '', '', '', '','',''))
     elif(elem["type"]=="MpiWait"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, '', elem["current_rank"], '', '',
-                             '', elem["req"]))
+                             '', elem["req"],'',''))
     elif(elem["type"]=="MpiIrecv"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
-                             elem["req"]))
+                             elem["req"],'',''))
     elif(elem["type"]=="MpiRecv"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],''))
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','',''))
     elif(elem["type"]=="MpiSend"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],''))
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','',''))
     elif(elem["type"]=="MpiIsend"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
-                             elem["req"]))
+                             elem["req"],'',''))
     return table
 
 def make_pair_isw(mpi_operation):
@@ -126,7 +131,7 @@ def make_pair_isw(mpi_operation):
 class pair_async_wait:
 
     def coverage(self):
-        cost_op = tsc_after(self.op1) - self.op1["tsc"] + tsc_after(self.op2) - self.op2["tsc"]
+        cost_op = self.op1["duration"] + self.op2["duration"]
         cost_compu = self.op2["tsc"] - tsc_after(self.op1)
         return (cost_compu / cost_op) * 100
 
@@ -194,6 +199,7 @@ def make_pair_sr(mpi_operation, ratio):
                     break
     return pair_sr
 
+
 def gather_info(liste_mpi_op, liste_isw):
     info = [0] * 4
     max_rank = 0
@@ -213,7 +219,7 @@ def gather_info(liste_mpi_op, liste_isw):
         if elem.coverage < 100:
             nb_bad_async = nb_bad_async + 1
         compu_cost = compu_cost + (elem.op2["tsc"] - tsc_after(elem.op1))
-        mpi_cost = mpi_cost + (tsc_after(elem.op1) - elem.op1["tsc"] + tsc_after(elem.op2) - elem.op2["tsc"])
+        mpi_cost = mpi_cost + (elem.op1["duration"] + elem.op2["duration"])
 
     if len(liste_isw):
         info[2] = nb_bad_async
@@ -236,22 +242,31 @@ def gather_process_info(liste_mpi_op,nb_rank):
         process_info[i]["nb_partner"] = 0
 
     for elem in liste_mpi_op:
+        
         erank = elem["current_rank"]
+        
         if(elem["type"] in MPI_SEND_OP):
             process_info[erank]["nb_message_sent"] = process_info[erank]["nb_message_sent"] + 1
+        
         if(elem["type"] in MPI_RECV_OP):
             process_info[erank]["nb_message_recv"] = process_info[erank]["nb_message_recv"] + 1
+        
         if(elem["type"] in MPI_BARRIER_OP):
             process_info[erank]["nb_barrier"] = process_info[erank]["nb_barrier"] + 1
+        
         if(elem["type"] in MPI_ASYNC_OP):
             process_info[erank]["nb_async_op"] = process_info[erank]["nb_async_op"] + 1
+        
         elif(elem["type"] in MPI_SYNC_OP):
             process_info[erank]["nb_sync_op"] = process_info[erank]["nb_sync_op"] + 1
+        
         if((elem["type"] in MPI_SEND_OP) or (elem["type"] in MPI_RECV_OP) or (elem["type"] in MPI_COLL_OP)):
             if(elem["partner_rank"] not in process_info[erank]["list_partner"]):
                 process_info[erank]["list_partner"].append(elem["partner_rank"])
                 process_info[erank]["nb_partner"] = process_info[erank]["nb_partner"] + 1
+       
         print(process_info[erank])
+    
     list_string = []
     for i in range(0,nb_rank):
         list_string.append("Messages sent:\t\t" + str(process_info[i]["nb_message_sent"]) + "\n" +
@@ -263,6 +278,7 @@ def gather_process_info(liste_mpi_op,nb_rank):
             "Partner list:\t\t" + str(process_info[i]["list_partner"]) + "\n"
             )
     return list_string
+
 
 def nb_rank(liste):
     max_ = 0
@@ -295,8 +311,7 @@ def total_asynchronisme(liste):
     mpi_cost = 0
     for elem in liste:
         compu_cost = compu_cost + (elem.op2["tsc"] - tsc_after(elem.op1))
-        mpi_cost = mpi_cost + (tsc_after(elem.op1) - elem.op1["tsc"] +
-                               tsc_after(elem.op2) - elem.op2["before"])
+        mpi_cost = mpi_cost + (elem.op1["duration"] + elem.op2["duration"])
     if len(liste):
         return (compu_cost / mpi_cost) * 100
     else:

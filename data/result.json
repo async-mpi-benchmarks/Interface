@@ -1,0 +1,102 @@
+[
+  {
+    "type": "MpiInitThread",
+    "current_rank": 0,
+    "required_thread_lvl": 3,
+    "provided_thread_lvl": 3,
+    "tsc": 1598187483914,
+    "time": 1651537141.63264
+  },
+  {
+    "type": "MpiIsend",
+    "current_rank": 0,
+    "partner_rank": 1,
+    "nb_bytes": 10,
+    "comm": 0,
+    "req": 1,
+    "tag": 123,
+    "tsc": 1598245752304,
+    "duration": 24046
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 0,
+    "req": 0,
+    "tsc": 1598245792030,
+    "duration": 10022
+  },
+  {
+    "type": "MpiRecv",
+    "current_rank": 0,
+    "partner_rank": 1,
+    "nb_bytes": 40,
+    "comm": 0,
+    "tag": 123,
+    "tsc": 1598245806116,
+    "duration": 38132
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 0,
+    "req": 0,
+    "tsc": 1598245847380,
+    "duration": 124
+  },
+  {
+    "type": "MpiFinalize",
+    "current_rank": 0,
+    "tsc": 1598249620406,
+    "time": 1651537141.65853
+  }
+,
+
+  {
+    "type": "MpiInitThread",
+    "current_rank": 1,
+    "required_thread_lvl": 3,
+    "provided_thread_lvl": 3,
+    "tsc": 1598189525438,
+    "time": 1651537141.63349
+  },
+  {
+    "type": "MpiRecv",
+    "current_rank": 1,
+    "partner_rank": 0,
+    "nb_bytes": 40,
+    "comm": 0,
+    "tag": 123,
+    "tsc": 1598245752118,
+    "duration": 52636
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 1,
+    "req": 0,
+    "tsc": 1598245817036,
+    "duration": 876
+  },
+  {
+    "type": "MpiIsend",
+    "current_rank": 1,
+    "partner_rank": 0,
+    "nb_bytes": 10,
+    "comm": 0,
+    "req": 1,
+    "tag": 123,
+    "tsc": 1598245822640,
+    "duration": 6754
+  },
+  {
+    "type": "MpiWait",
+    "current_rank": 1,
+    "req": 0,
+    "tsc": 1598245832144,
+    "duration": 456
+  },
+  {
+    "type": "MpiFinalize",
+    "current_rank": 1,
+    "tsc": 1598355236858,
+    "time": 1651537141.702537
+  }
+]
