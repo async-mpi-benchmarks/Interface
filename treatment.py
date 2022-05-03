@@ -58,11 +58,15 @@ def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
     y1 = y0 + 50
     canvas.create_rectangle(x0, y0, x1, y1, fill='grey')
     if(elem["type"] not in MPI_INIT_OP and elem["type"] != "MpiFinalize"):
+        if(elem["type"] in MPI_SEND_OP or elem["type"] in MPI_RECV_OP):
+            color = "blue"
+        if(elem["type"] in MPI_WAIT_OP):
+            color = "dark red"
         x0 = offset + (elem["tsc"] - deb) / float(ratio)
         x1 = offset + (tsc_after(elem) - deb) / float(ratio)
         y0 = y1 + 15
         y1 = y0 + 50
-        canvas.create_rectangle(x0, y0, x1, y1, fill='blue')
+        canvas.create_rectangle(x0, y0, x1, y1, fill=color)
         draw_timeline_text(canvas,elem,x0+3,y0+3)
 
 def draw_table(elem,table, deb, ratio):
