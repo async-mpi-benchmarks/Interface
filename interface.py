@@ -4,10 +4,11 @@ import ipywidgets as widgets
 import numpy as np
 import matplotlib.ticker
 from treatment import *
-from tkinter import *
+import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+
 
 
 class global_info_window(Tk):
@@ -29,28 +30,31 @@ class global_info_window(Tk):
         self.root.configure(scrollregion=self.root.bbox("all"))
         self.root.create_window((4, 4), window=self.main, anchor="nw")
         self.main.bind("<Configure>", self.onFrameConfigure)
+        self.pair_isw = []
         self.render_info()
 
     def onFrameConfigure(self, event):
         self.root.configure(scrollregion=self.root.bbox("all"))
-
-    def render_info(self):
         
+    def render_info(self):
         self.frame_info = Frame(self.main, bd=5)
         self.frame_info.pack(side=TOP, anchor=NW, padx=2, pady=2)
         self.pair_isw = make_pair_isw(self.mpi_op_list)
         info = gather_info(self.mpi_op_list, self.pair_isw)
-        text = "Number of rank: " + str(
-            info[0]) + "\n" + "Number of message sent: " + str(
-                info[1]) + "\n" + "Number of MPI function: " + str(
-                    len(self.mpi_op_list)
+        text = "GLOBAL INFO: \n\n"+"Number of process: " + str(
+              info[0]) + "\n" + "Number of message sent: " + str(
+              info[1]) + "\n" + "Number of MPI function: " + str(
+                len(self.mpi_op_list)
                 ) + "\n" + "Number of bad async message: " + str(
-                    info[2]) + "\n" + "% of mpi operation " + str(
-                        round(100 - info[3], 2)) + "%"
+                    info[2]) + "\n" + "% of mpi operation " + str(round(100 - info[3], 2)) + "%\n"
+            
+            process_info = gather_process_info(self.mpi_op_list,info[0])
+            for i in range(0,info[0]):
+                text = text + "___________________________________________\n Process " +str(i)+":\n\n" + process_info[i]
 
-        self.info_text = Label(self.frame_info, text=text)
-        self.info_text.pack()
-        self.root.configure(scrollregion=self.root.bbox("all"))
+            self.info_text = Label(self.frame_info, text=text)
+            self.info_text.pack(side=LEFT,anchor='w')
+            self.root.configure(scrollregion=self.root.bbox("all"))
         
 class Table_window(Tk):
     
@@ -96,13 +100,14 @@ class Table_window(Tk):
         self.table = ttk.Treeview(self.render_table,
                                       yscrollcommand=self.table_scrolly.set,
                                       xscrollcommand=self.table_scrollx.set)
-                                     
 
         self.table.pack()
+        self.table_scrollx.config(command=self.table.xview)
         self.table_scrolly.config(command=self.table.yview)
+
         self.table['columns'] = ('op_type', 'Time_before', 'Time_after',
-                                    'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
-                                    'Request')
+                                 'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
+                                 'Request','Required_level','Provided_level')
 
         self.table.column("#0", width=0, stretch=NO)
         self.table.column("op_type", anchor=CENTER, width=120)
@@ -114,11 +119,14 @@ class Table_window(Tk):
         self.table.column("Tag", anchor=CENTER, width=100)
         self.table.column("Comm", anchor=CENTER, width=100)
         self.table.column("Request", anchor=CENTER, width=100)
+        self.table.column("Required_level", anchor=CENTER, width=100)
+        self.table.column("Provided_level", anchor=CENTER, width=100)
+
         self.table.heading("#0", text="", anchor=CENTER)
         self.table.heading("op_type", text="Operation Type", anchor=CENTER)
         self.table.heading("Time_before",
-                            text="Time before",
-                            anchor=CENTER)
+                           text="Time before",
+                           anchor=CENTER)
         self.table.heading("Time_after", text="Time after", anchor=CENTER)
         self.table.heading("Bytes", text="Bytes", anchor=CENTER)
         self.table.heading("Rank", text="Rank", anchor=CENTER)
@@ -126,11 +134,13 @@ class Table_window(Tk):
         self.table.heading("Tag", text="Tag", anchor=CENTER)
         self.table.heading("Comm", text="Comm", anchor=CENTER)
         self.table.heading("Request", text="Request", anchor=CENTER)
+        self.table.heading("Required_level", text="Required level", anchor=CENTER)
+        self.table.heading("Provided_level", text="Provided level", anchor=CENTER)
 
         for elem in self.mpi_op_list:
             self.table = draw_table(elem,self.table, deb, self.ratio_cy_sec)
-            self.table.pack()
-            self.root.configure(scrollregion=self.root.bbox("all"))
+        self.table.pack()
+        self.root.configure(scrollregion=self.root.bbox("all"))
  
 class Timeline_window(Tk):
     
@@ -140,90 +150,110 @@ class Timeline_window(Tk):
         self.title('Operation MPI table ')
         self.geometry('1045x400')
         self.ratio_cy_sec = ratio_cy_sec
+        self.ratio = 0
+        self.local_ratio = 0
+        self.offset = 20
+        self.voffset = 50
+        self.time_len = 0
+        self.nb_ra = 0
         self.render_timeline()
         
     def onFrameConfigure(self, event):
         self.root.configure(scrollregion=self.root.bbox("all"))
 
     def render_timeline(self):
+        self.time_len = self.mpi_op_list[len(self.mpi_op_list) -1]["tsc"] - self.mpi_op_list[0]["tsc"]
+        if self.time_len > 1000000:
+            self.ratio = 15
+        else:
+             self.ratio = 1
+        self.local_ratio = self.ratio
 
-            time_len = self.mpi_op_list[len(self.mpi_op_list) -1]["tsc"] - self.mpi_op_list[0]["tsc"]
-            if time_len > 1000000:
-                ratio = 15
-            else:
-                ratio = 1
-            
-            offset = 20
-            voffset = 50
-            deb = self.mpi_op_list[0]["tsc"]
-            nb_ra = nb_rank(self.mpi_op_list)
-            last_op = []
-            last_time = self.mpi_op_list[len(self.mpi_op_list) - 1]["tsc"]
-            self.frame_timeline = Frame(self, bd=5, height=400)
-            self.frame_timeline.pack(fill=BOTH,expand=True)
-            self.timeline_canvas = Canvas(self.frame_timeline,
+        self.frame_timeline = Frame(self, bd=5, height=400)
+        self.frame_timeline.pack(fill=BOTH,expand=True)
+
+        self.timeline_canvas = Canvas(self.frame_timeline,
                                           width=1000)
 
-            self.timeline_scrollx = Scrollbar(self.frame_timeline,
-                                              orient='horizontal')
-            self.timeline_scrollx.pack(side=BOTTOM, fill=BOTH)
-            self.timeline_scrollx.config(command=self.timeline_canvas.xview)
+        self.draw_render_timeline()
 
-            self.timeline_scrolly = Scrollbar(self.frame_timeline,
-                                              orient='vertical')
-            self.timeline_scrolly.pack(side=RIGHT, fill=BOTH)
-            self.timeline_scrolly.config(command=self.timeline_canvas.yview)
+        self.root.configure(scrollregion=self.root.bbox("all"))
+        self.scalewidget = tk.Scale(self.frame_timeline, from_=1, to=100000, length=500,
+                                    orient=tk.VERTICAL, font="Consolas 6", command=self.resize_canvas)
+        self.scalewidget.set(100)
+        self.scalewidget.pack(side=tk.TOP, fill=tk.Y, expand=False)
 
-            for i in range(0, nb_ra):
-                last_op.append(deb)
+    def resize_canvas(self,percentage):
+        a,b = self.timeline_scrollx.get()
+        print(a,b)
+
+        self.timeline_canvas.delete("all")
+        percentage = float(percentage) / 100
+        self.local_ratio = self.ratio*percentage
+        self.draw_render_timeline()
+        print(a,b)
+        self.timeline_scrollx.set(a,b)
+
+    def draw_render_timeline(self):
+        
+        deb = self.mpi_op_list[0]["tsc"]
+        self.nb_ra = nb_rank(self.mpi_op_list)
+        last_op = []
+        last_time = self.mpi_op_list[len(self.mpi_op_list) - 1]["tsc"]
+
+        for i in range(0, self.nb_ra):
+            last_op.append(deb)
             cpt = 0
-            for elem in self.mpi_op_list:
-                if elem["type"] != 'MpiInit' and elem["type"] != 'MpiInitThread':
-                    draw_timeline(elem,deb, self.timeline_canvas, last_op,
-                                       offset, voffset, ratio)
-                    cpt = cpt + 1
-                    if elem["type"] != 'MpiFinalize':
-                        last_op[elem["current_rank"]] = tsc_after(elem)
-                        
-            for i in range(1, nb_ra):
-                self.timeline_canvas.create_line(
-                    0,
-                    i * 130 + voffset,
-                    self.timeline_canvas.bbox("all")[2],
-                    i * 130 + voffset,
-                    dash=(4, 4))
+        for elem in self.mpi_op_list:
+            if elem["type"] not in MPI_INIT_OP:
+                draw_timeline(elem,deb, self.timeline_canvas, last_op,
+                                   self.offset, self.voffset, self.local_ratio)
+                cpt = cpt + 1
+                if elem["type"] != 'MpiFinalize':
+                    last_op[elem["current_rank"]] = tsc_after(elem)
+                    
+        for i in range(1, self.nb_ra):
+            self.timeline_canvas.create_line(
+                0,
+                i * 130 + self.voffset,
+                self.timeline_canvas.bbox("all")[2],
+                i * 130 + self.voffset,
+                dash=(4, 4))
+        
+        for i in range(0, self.nb_ra):
+            self.timeline_canvas.create_text(0,
+                                             70 + 140 * i,
+                                             text=str(i),
+                                             anchor='w')
 
-            for i in range(0, nb_ra):
-                self.timeline_canvas.create_text(0,
-                                                 70 + 140 * i,
-                                                 text=str(i),
-                                                 anchor='w')
-
-            i = 0
-            if time_len > 1000000:
-                step = 1000
-            else:
-                step = 50
-            #while i < self.timeline_canvas.bbox("all")[2]:
-            #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
-            #    self.timeline_canvas.create_text(offset + i,
-            #                                     5,
-            #                                     text=str(i/self.ratio_cy_sec) + "\n|",
-            #                                     anchor='n')
-            #    i = i + step
-
-            self.timeline_canvas.config(
+        i = 0
+        if self.time_len > 1000000:
+            step = 1000
+        else:
+            step = 50
+        #while i < self.timeline_canvas.bbox("all")[2]:
+        #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
+        #    self.timeline_canvas.create_text(self.offset + i,
+        #                                     5,
+        #                                     text=str(i/self.ratio_cy_sec) + "\n|",
+        #                                     anchor='n')
+        #    i = i + step
+        self.timeline_canvas.config(
                 xscrollcommand=self.timeline_scrollx.set,
                 yscrollcommand=self.timeline_scrolly.set,
-                height=nb_ra * 150 + voffset,
+                height=self.nb_ra * 150 + self.voffset,
                 scrollregion=self.timeline_canvas.bbox("all"))
-            self.timeline_canvas.pack(fill=BOTH, expand=True)
-            self.timeline_canvas.bind('<Configure>',self.resize)
+
+        self.timeline_scrollx.config(command=self.timeline_canvas.xview)
+        self.timeline_scrolly.config(command=self.timeline_canvas.yview)
+        self.timeline_canvas.pack(fill=BOTH, side=LEFT, expand=True)
+
+        self.timeline_canvas.bind('<Configure>',self.resize)
 
     def resize(self,event):
         w,h = event.width,event.height
         self.timeline_canvas.config(width=w-50,height=h-50)
-        
+      
 
 class MainWindow(Tk):
 
@@ -323,12 +353,7 @@ class MainWindow(Tk):
         menu_plot.add_command(label="Plot throughput",command=self.plot_debit)
         menu_plot.add_command(label="Plot coverage",command=self.plot_coverage)
         menu_button.config(menu=menu_plot)
-
         Button(self,width=15,height=3, text='Timeline',command=self.timeline_window).grid(row=3,column=2)
-
-
-
-    
 
 window = MainWindow()
 window.mainloop()
