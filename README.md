@@ -8,6 +8,7 @@ This programme has been created to process result from Interpol library
 	pip3
 	tkinter
 	matplotlib
+	ipywidgets
 
 ### Installation
 ```bash

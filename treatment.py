@@ -7,7 +7,7 @@ import threading
 MPI_SEND_OP = ['MpiIsend' , 'MpiSend']
 MPI_RECV_OP = ['MpiRecv' , 'MpiIrecv']
 MPI_WAIT_OP = ['MpiWait']
-MPI_ASYNC_OP = ['MpiIsend' , 'MpiIrecv']
+MPI_ASYNC_OP = ['MpiIsend' , 'MpiIrecv', 'MpiIbarrier']
 MPI_SYNC_OP = ['MpiSend' , 'MpiRecv', 'MpiBarrier']
 MPI_INIT_OP = ['MpiInit' , 'MpiInitThread']
 MPI_BARRIER_OP = ['MpiBarrier' , 'MpiIbarrier']
@@ -87,32 +87,19 @@ def draw_table(elem,table, deb, ratio):
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, '', elem["current_rank"], '', '',
                              '', elem["req"],'',''))
-    elif(elem["type"]=="MpiIrecv"):
+    elif(elem["type"]=="MpiIrecv" or elem["type"]=="MpiIsend"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
                              elem["req"],'',''))
-    elif(elem["type"]=="MpiRecv"):
+    elif(elem["type"]=="MpiRecv" or elem["type"]=="MpiSend"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','',''))
-    elif(elem["type"]=="MpiSend"):
-        table.insert(parent='',
-                     index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','',''))
-    elif(elem["type"]=="MpiIsend"):
-        table.insert(parent='',
-                     index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
-                             elem["req"],'',''))
     return table
 
 def make_pair_isw(mpi_operation):
