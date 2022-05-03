@@ -264,8 +264,6 @@ def gather_process_info(liste_mpi_op,nb_rank):
             if(elem["partner_rank"] not in process_info[erank]["list_partner"]):
                 process_info[erank]["list_partner"].append(elem["partner_rank"])
                 process_info[erank]["nb_partner"] = process_info[erank]["nb_partner"] + 1
-       
-        print(process_info[erank])
     
     list_string = []
     for i in range(0,nb_rank):

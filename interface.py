@@ -17,7 +17,7 @@ class global_info_window(Tk):
         Tk.__init__(self)
         self.mpi_op_list=mpi_op_list
         self.title('Global info')
-        self.geometry('304x101')
+        self.geometry('304x490')
         self.resizable(False,True)
         self.root = Canvas(self, bg='white')
         self.root.pack(side=TOP, anchor=NW, expand=True, fill=BOTH)
@@ -48,13 +48,13 @@ class global_info_window(Tk):
                 ) + "\n" + "Number of bad async message: " + str(
                     info[2]) + "\n" + "% of mpi operation " + str(round(100 - info[3], 2)) + "%\n"
             
-            process_info = gather_process_info(self.mpi_op_list,info[0])
-            for i in range(0,info[0]):
-                text = text + "___________________________________________\n Process " +str(i)+":\n\n" + process_info[i]
+        process_info = gather_process_info(self.mpi_op_list,info[0])
+        for i in range(0,info[0]):
+            text = text + "___________________________________________\n Process " +str(i)+":\n\n" + process_info[i]
 
-            self.info_text = Label(self.frame_info, text=text)
-            self.info_text.pack(side=LEFT,anchor='w')
-            self.root.configure(scrollregion=self.root.bbox("all"))
+        self.info_text = Label(self.frame_info, text=text)
+        self.info_text.pack(side=LEFT,anchor='w')
+        self.root.configure(scrollregion=self.root.bbox("all"))
         
 class Table_window(Tk):
     
@@ -172,12 +172,17 @@ class Timeline_window(Tk):
         self.frame_timeline = Frame(self, bd=5, height=400)
         self.frame_timeline.pack(fill=BOTH,expand=True)
 
+        self.timeline_scrollx = Scrollbar(self.frame_timeline,orient='horizontal')
+        self.timeline_scrollx.pack(side=BOTTOM, fill=BOTH)
+
+        self.timeline_scrolly = Scrollbar(self.frame_timeline,orient='vertical')
+        self.timeline_scrolly.pack(side=RIGHT, fill=BOTH)
+
         self.timeline_canvas = Canvas(self.frame_timeline,
                                           width=1000)
 
         self.draw_render_timeline()
 
-        self.root.configure(scrollregion=self.root.bbox("all"))
         self.scalewidget = tk.Scale(self.frame_timeline, from_=1, to=100000, length=500,
                                     orient=tk.VERTICAL, font="Consolas 6", command=self.resize_canvas)
         self.scalewidget.set(100)
