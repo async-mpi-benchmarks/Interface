@@ -172,7 +172,7 @@ class Timeline_window(Tk):
         self.frame_timeline = Frame(self, bd=5, height=400)
         self.frame_timeline.pack(fill=BOTH,expand=True)
 
-        self.timeline_scrollx = Scrollbar(self.frame_timeline,orient='horizontal')
+        self.timeline_scrollx = Scrollbar(self.frame_timeline,orient='horizontal',command=self.marker)
         self.timeline_scrollx.pack(side=BOTTOM, fill=BOTH)
 
         self.timeline_scrolly = Scrollbar(self.frame_timeline,orient='vertical')
@@ -190,13 +190,14 @@ class Timeline_window(Tk):
 
     def resize_canvas(self,percentage):
         a,b = self.timeline_scrollx.get()
-        print(a,b)
 
         self.timeline_canvas.delete("all")
         percentage = float(percentage) / 100
         self.local_ratio = self.ratio*percentage
         self.draw_render_timeline()
-        print(a,b)
+        self.marker()
+
+        print("------------------------")
         self.timeline_scrollx.set(a,b)
 
     def draw_render_timeline(self):
@@ -230,12 +231,8 @@ class Timeline_window(Tk):
                                              70 + 140 * i,
                                              text=str(i),
                                              anchor='w')
-
         i = 0
-        if self.time_len > 1000000:
-            step = 1000
-        else:
-            step = 50
+        
         #while i < self.timeline_canvas.bbox("all")[2]:
         #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
         #    self.timeline_canvas.create_text(self.offset + i,
@@ -258,6 +255,18 @@ class Timeline_window(Tk):
     def resize(self,event):
         w,h = event.width,event.height
         self.timeline_canvas.config(width=w-50,height=h-50)
+
+    def marker(self):
+        print('av')
+        a,b = self.timeline_scrollx.get()
+        a_len = a * (self.time_len/self.local_ratio)
+        b_len = a * (self.time_len/self.local_ratio)
+        len_window = b_len - a_len
+        for i in range(1,3):
+            self.timeline_canvas.create_text(self.offset + a_len+(i/4)*len_window,
+                                         5,
+                                         text=str(a_len+(i/4)*len_window/self.ratio_cy_sec) + "\n|",
+                                         anchor='n')
       
 
 class MainWindow(Tk):
