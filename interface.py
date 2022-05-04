@@ -62,7 +62,7 @@ class Table_window(Tk):
         Tk.__init__(self)
         self.mpi_op_list=mpi_op_list
         self.title('Operation MPI table ')
-        self.geometry('1150x250')
+        self.geometry('1344x250')
         self.ratio_cy_sec = ratio_cy_sec
         self.root = Canvas(self, bg='white')
         self.root.pack(side=TOP, anchor=NW, expand=True, fill=BOTH)
@@ -107,7 +107,7 @@ class Table_window(Tk):
 
         self.table['columns'] = ('op_type', 'Time_before', 'Time_after',
                                  'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
-                                 'Request','Required_level','Provided_level')
+                                 'Request','Root','Op_Reduce','Required_level','Provided_level')
 
         self.table.column("#0", width=0, stretch=NO)
         self.table.column("op_type", anchor=CENTER, width=120)
@@ -119,9 +119,10 @@ class Table_window(Tk):
         self.table.column("Tag", anchor=CENTER, width=100)
         self.table.column("Comm", anchor=CENTER, width=100)
         self.table.column("Request", anchor=CENTER, width=100)
+        self.table.column("Root", anchor=CENTER, width=100)
+        self.table.column("Op_Reduce", anchor=CENTER, width=100)
         self.table.column("Required_level", anchor=CENTER, width=100)
         self.table.column("Provided_level", anchor=CENTER, width=100)
-
         self.table.heading("#0", text="", anchor=CENTER)
         self.table.heading("op_type", text="Operation Type", anchor=CENTER)
         self.table.heading("Time_before",
@@ -134,6 +135,8 @@ class Table_window(Tk):
         self.table.heading("Tag", text="Tag", anchor=CENTER)
         self.table.heading("Comm", text="Comm", anchor=CENTER)
         self.table.heading("Request", text="Request", anchor=CENTER)
+        self.table.heading("Root", text="Root", anchor=CENTER)
+        self.table.heading("Op_Reduce", text="Op_Reduce", anchor=CENTER)
         self.table.heading("Required_level", text="Required level", anchor=CENTER)
         self.table.heading("Provided_level", text="Provided level", anchor=CENTER)
 
