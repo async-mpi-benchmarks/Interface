@@ -7,11 +7,11 @@ import threading
 MPI_SEND_OP = ['MpiIsend' , 'MpiSend']
 MPI_RECV_OP = ['MpiRecv' , 'MpiIrecv']
 MPI_WAIT_OP = ['MpiWait']
-MPI_ASYNC_OP = ['MpiIsend' , 'MpiIrecv', 'MpiIbarrier']
+MPI_ASYNC_OP = ['MpiIsend' , 'MpiIrecv', 'MpiIbarrier','MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter']
 MPI_SYNC_OP = ['MpiSend' , 'MpiRecv', 'MpiBarrier']
 MPI_INIT_OP = ['MpiInit' , 'MpiInitThread']
 MPI_BARRIER_OP = ['MpiBarrier' , 'MpiIbarrier']
-MPI_COLL_OP = []
+MPI_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter']
 
 def tsc_after(elem):
     return elem["tsc"]+elem["duration"]
@@ -50,6 +50,11 @@ def draw_timeline_text(canvas,elem,x,y):
                            str(elem["comm"]) + "\n req: " +
                            str(elem["req"]),
                            anchor=NW)
+    elif(elem["type"]=="MpiBarrier"):
+        canvas.create_text(x,y,
+                           text=str(elem["type"])+ "\n" +" comm: " +
+                           str(elem["comm"]), anchor=NW)
+
 
 def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
     x0 = offset + (last_op[elem["current_rank"]] - deb) / float(ratio)
@@ -62,6 +67,8 @@ def draw_timeline(elem,deb,canvas,last_op,offset,voffset,ratio):
             color = "blue"
         if(elem["type"] in MPI_WAIT_OP):
             color = "dark red"
+        if(elem["type"] in MPI_BARRIER_OP):
+            color = "red"
         x0 = offset + (elem["tsc"] - deb) / float(ratio)
         x1 = offset + (tsc_after(elem) - deb) / float(ratio)
         y0 = y1 + 15
@@ -104,6 +111,13 @@ def draw_table(elem,table, deb, ratio):
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','',''))
+    elif(elem["type"]=="MpiBarrier"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio,'',
+                             elem["current_rank"],'','', elem["comm"],'','',''))
+
     return table
 
 def make_pair_isw(mpi_operation):
