@@ -153,7 +153,8 @@ class Timeline_window(Tk):
         self.title('Operation MPI table ')
         self.geometry('1045x400')
         self.ratio_cy_sec = ratio_cy_sec
-        self.ratio = 0
+        self.ratio = 1
+        self.percentage = 100
         self.local_ratio = 0
         self.offset = 20
         self.voffset = 50
@@ -166,10 +167,6 @@ class Timeline_window(Tk):
 
     def render_timeline(self):
         self.time_len = self.mpi_op_list[len(self.mpi_op_list) -1]["tsc"] - self.mpi_op_list[0]["tsc"]
-        if self.time_len > 1000000:
-            self.ratio = 15
-        else:
-             self.ratio = 1
         self.local_ratio = self.ratio
 
         self.frame_timeline = Frame(self, bd=5, height=400)
@@ -186,20 +183,19 @@ class Timeline_window(Tk):
 
         self.draw_render_timeline()
 
-        self.scalewidget = tk.Scale(self.frame_timeline, from_=1, to=100000, length=500,
+        self.scalewidget = tk.Scale(self.frame_timeline, from_=1, to=10000, length=1000,
                                     orient=tk.VERTICAL, font="Consolas 6", command=self.resize_canvas)
-        self.scalewidget.set(100)
+        self.scalewidget.set(1)
         self.scalewidget.pack(side=tk.TOP, fill=tk.Y, expand=False)
 
     def resize_canvas(self,percentage):
         a,b = self.timeline_scrollx.get()
-        print(a,b)
 
         self.timeline_canvas.delete("all")
-        percentage = float(percentage) / 100
-        self.local_ratio = self.ratio*percentage
+        self.percentage = float(percentage)
+        self.local_ratio = self.ratio*self.percentage
         self.draw_render_timeline()
-        print(a,b)
+        self.marker(a,b)
         self.timeline_scrollx.set(a,b)
 
     def draw_render_timeline(self):
@@ -233,12 +229,8 @@ class Timeline_window(Tk):
                                              70 + 140 * i,
                                              text=str(i),
                                              anchor='w')
-
         i = 0
-        if self.time_len > 1000000:
-            step = 1000
-        else:
-            step = 50
+        
         #while i < self.timeline_canvas.bbox("all")[2]:
         #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
         #    self.timeline_canvas.create_text(self.offset + i,
@@ -247,7 +239,7 @@ class Timeline_window(Tk):
         #                                     anchor='n')
         #    i = i + step
         self.timeline_canvas.config(
-                xscrollcommand=self.timeline_scrollx.set,
+                xscrollcommand=self.marker,
                 yscrollcommand=self.timeline_scrolly.set,
                 height=self.nb_ra * 150 + self.voffset,
                 scrollregion=self.timeline_canvas.bbox("all"))
@@ -261,6 +253,20 @@ class Timeline_window(Tk):
     def resize(self,event):
         w,h = event.width,event.height
         self.timeline_canvas.config(width=w-50,height=h-50)
+
+    def marker(self,x0, x1):
+        self.timeline_canvas.delete("marker")
+        self.timeline_scrollx.set(x0,x1)
+        a,b = self.timeline_scrollx.get()
+        a_len = a * (self.time_len/self.local_ratio)
+        b_len = b * (self.time_len/self.local_ratio)
+        len_window = b_len - a_len
+        for i in range(1,3):
+            self.timeline_canvas.create_text(int(self.offset + a_len+(i/3)*len_window),
+                                         5,
+                                         text="%3.8f" % (float((a_len+(i/3)*len_window)*(self.local_ratio))/float(self.ratio_cy_sec)) + "\n|",
+                                         anchor='n')
+            self.timeline_canvas.addtag_closest("marker",a_len+(i/3)*len_window,5)
       
 
 class MainWindow(Tk):
