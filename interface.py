@@ -231,13 +231,6 @@ class Timeline_window(Tk):
                                              anchor='w')
         i = 0
         
-        #while i < self.timeline_canvas.bbox("all")[2]:
-        #    print(str(i) + "/"+str(self.timeline_canvas.bbox("all")[2]))
-        #    self.timeline_canvas.create_text(self.offset + i,
-        #                                     5,
-        #                                     text=str(i/self.ratio_cy_sec) + "\n|",
-        #                                     anchor='n')
-        #    i = i + step
         self.timeline_canvas.config(
                 xscrollcommand=self.marker,
                 yscrollcommand=self.timeline_scrolly.set,
