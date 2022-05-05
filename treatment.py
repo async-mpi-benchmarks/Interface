@@ -14,7 +14,7 @@ MPI_BARRIER_OP = ['MpiBarrier' , 'MpiIbarrier']
 MPI_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter','MpiBcast','MpiReduce','MpiGather','MpiScatter']
 MPI_ASYNC_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter']
 MPI_SYNC_COLL_OP = ['MpiBcast','MpiReduce','MpiGather','MpiScatter']
-OPERATION_REDUCE=['MPI_MAX','MPI_MIN','MPI_SUM','MPI_PROD','MPI_LAND','MPI_LOR','MPI_BAND','MPI_BOR','MPI_MAXLOG','MPI_MINLOC']
+OPERATION_REDUCE=['MPI_OP_NUL','MPI_MAX','MPI_MIN','MPI_SUM','MPI_PROD','MPI_LAND','MPI_BAND','MPI_LOR','MPI_BOR','MPI_LXOR','MPI_BXOR','MPI_MAXLOG','MPI_MINLOC','MPI_REPLACE']
 
 def tsc_after(elem):
     return elem["tsc"]+elem["duration"]
