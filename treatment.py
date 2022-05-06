@@ -189,6 +189,44 @@ def draw_table(elem,table, deb, ratio):
                              (tsc_after(elem) - deb) / ratio,'',
                              elem["current_rank"],'','', elem["comm"],'','','','','','',''))
 
+    elif(elem["type"]=="MpiIbarrier"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio,'',
+                             elem["current_rank"],'','', elem["comm"],elem["req"],'','','','','',''))
+
+    elif(elem["type"]=="MpiIbcast" or elem["type"]=="MpiIgather" or elem["type"]=="MpiIscatter"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
+                             elem["req"],elem["Root"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+
+    elif(elem["type"]=="MpiBcast" or elem["type"]=="MpiGather" or elem["type"]=="MpiScatter"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
+                             '',elem["Root"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+
+    elif(elem["type"]=="MpiIscatter"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
+                             elem["req"],elem["Root"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+
+    elif(elem["type"]=="MpiScatter"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
+                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
+                             '',elem["Root"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     return table
 
