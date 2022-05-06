@@ -62,7 +62,7 @@ class Table_window(Tk):
         Tk.__init__(self)
         self.mpi_op_list=mpi_op_list
         self.title('Operation MPI table ')
-        self.geometry('1344x250')
+        self.geometry('1540x250')
         self.ratio_cy_sec = ratio_cy_sec
         self.root = Canvas(self, bg='white')
         self.root.pack(side=TOP, anchor=NW, expand=True, fill=BOTH)
