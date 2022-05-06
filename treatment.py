@@ -202,7 +202,7 @@ def draw_table(elem,table, deb, ratio):
                      values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
                              "%.6e" % (elem["duration"] / ratio), '',
                              elem["current_rank"], '','', elem["comm"],
-                             elem["req"],elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             elem["req"],elem["partner_rank"],'','','','',''))
 
     elif(elem["type"]=="MpiBcast" or elem["type"]=="MpiGather" or elem["type"]=="MpiScatter"):
         table.insert(parent='',
@@ -210,7 +210,7 @@ def draw_table(elem,table, deb, ratio):
                      values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
                              "%.6e" % (elem["duration"] / ratio), '',
                              elem["current_rank"], '','', elem["comm"],
-                             '',elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             '',elem["partner_rank"],'','','','',''))
 
     elif(elem["type"]=="MpiIscatter"):
         table.insert(parent='',
