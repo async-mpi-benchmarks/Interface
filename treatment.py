@@ -14,7 +14,7 @@ MPI_BARRIER_OP = ['MpiBarrier' , 'MpiIbarrier']
 MPI_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter','MpiBcast','MpiReduce','MpiGather','MpiScatter']
 MPI_ASYNC_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter']
 MPI_SYNC_COLL_OP = ['MpiBcast','MpiReduce','MpiGather','MpiScatter']
-OPERATION_REDUCE=['MPI_OP_NUL','MPI_MAX','MPI_MIN','MPI_SUM','MPI_PROD','MPI_LAND','MPI_BAND','MPI_LOR','MPI_BOR','MPI_LXOR','MPI_BXOR','MPI_MAXLOG','MPI_MINLOC','MPI_REPLACE']
+OPERATION_REDUCE=['MPI_OP_NUL','MPI_MAX','MPI_MIN','MPI_SUM','MPI_PROD','MPI_LAND','MPI_BAND','MPI_LOR','MPI_BOR','MPI_LXOR','MPI_BXOR','MPI_MAXLOC','MPI_MINLOC','MPI_REPLACE']
 
 def tsc_after(elem):
     return elem["tsc"]+elem["duration"]
@@ -74,15 +74,15 @@ def draw_timeline_text(canvas,elem,x,y):
     elif(elem["type"]=="MpiBcast"):
         canvas.create_text(x,y,
                            text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
-                           " root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
+                           "\nroot: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]),
                            anchor=NW)
 
     elif(elem["type"]=="MpiIgather"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes_send: " + str(elem["nb_bytes_send"]) +
-                           + "\n nb_bytes_recv: " + str(elem["nb_bytes_recv"]) +
-                           " root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
+                           text=str(elem["type"]) + "\nnb_bytes_send: " + str(elem["nb_bytes_send"]) +
+                           "\nnb_bytes_recv: " + str(elem["nb_bytes_recv"]) +
+                           "\nroot: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]) + "\n req: " +
                            str(elem["req"]),
                            anchor=NW)
@@ -112,13 +112,13 @@ def draw_timeline_text(canvas,elem,x,y):
 
     elif(elem["type"]=="MpiReduce"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'Op: '+ OPERATION_REDUCE[elem["op_type"]]+
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'\nOp: '+ str(OPERATION_REDUCE[elem["op_type"]])+
                            "\n root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]),
                            anchor=NW)
     elif(elem["type"]=="MpiIreduce"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'Op: '+ OPERATION_REDUCE[elem["op_type"]]+
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'\nOp: '+ str(OPERATION_REDUCE[elem["op_type"]])+
                            "\n root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"])+"\n req: " +
                            str(elem["req"]),
@@ -200,24 +200,24 @@ def draw_table(elem,table, deb, ratio):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
-                             elem["req"],elem["Root"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             (tsc_after(elem) - deb) / ratio, '',
+                             elem["current_rank"], '','', elem["comm"],
+                             elem["req"],elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiBcast" or elem["type"]=="MpiGather" or elem["type"]=="MpiScatter"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
-                             '',elem["Root"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             (tsc_after(elem) - deb) / ratio, '',
+                             elem["current_rank"], '','', elem["comm"],
+                             '',elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiIscatter"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
+                             elem["current_rank"], '','', elem["comm"],
                              elem["req"],elem["Root"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiScatter"):
@@ -225,8 +225,8 @@ def draw_table(elem,table, deb, ratio):
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"],elem["tag"], elem["comm"],
-                             '',elem["Root"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             elem["current_rank"], '','', elem["comm"],
+                             '',elem["partner_rank"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     return table
 
@@ -383,12 +383,12 @@ def gather_process_info(liste_mpi_op,nb_rank):
     list_string = []
     for i in range(0,nb_rank):
         list_string.append("Messages sent:\t\t" + str(process_info[i]["nb_message_sent"]) + "\n" +
-            "Messages received:\t" + str(process_info[i]["nb_message_recv"]) + "\n" +
+            "Messages received:\t\t" + str(process_info[i]["nb_message_recv"]) + "\n" +
             "Barriers:\t\t\t" + str(process_info[i]["nb_barrier"]) + "\n" +
             "Async operation:\t\t" + str(process_info[i]["nb_async_op"]) + "\n" +
             "Sync operation:\t\t" + str(process_info[i]["nb_sync_op"]) + "\n" +
             "Number of partner:\t\t" + str(process_info[i]["nb_partner"]) + "\n" +
-            "Partner list:\t\t" + str(process_info[i]["list_partner"]) + "\n"
+            "Partner list:\t" + str(process_info[i]["list_partner"]) + "\n"
             )
     return list_string
 
