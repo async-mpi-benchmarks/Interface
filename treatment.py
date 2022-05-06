@@ -262,7 +262,7 @@ class pair_async_wait:
     def coverage(self):
         cost_op = self.op1["duration"] + self.op2["duration"]
         cost_compu = self.op2["tsc"] - tsc_after(self.op1)
-        return (cost_op / cost_compu ) * 100
+        return (cost_compu/cost_op) * 100
 
     def __init__(self, op1, op2):
         if op1["tsc"] < op2["tsc"]:

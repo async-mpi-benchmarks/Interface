@@ -46,7 +46,7 @@ class global_info_window(Tk):
               info[1]) + "\n" + "Number of MPI function: " + str(
                 len(self.mpi_op_list)
                 ) + "\n" + "Number of bad async message: " + str(
-                    info[2]) + "\n" + "% of mpi operation " + str(round(100 - info[3], 2)) + "%\n"
+                    info[2]) + "\n" + "Average coverage of async call: " + str(round(100 - info[3], 2)) + "%\n"
             
         process_info = gather_process_info(self.mpi_op_list,info[0])
         for i in range(0,info[0]):
