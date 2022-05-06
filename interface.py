@@ -140,8 +140,8 @@ class Table_window(Tk):
         self.table.heading("Request", text="Request", anchor=CENTER)
         self.table.heading("Root", text="Root", anchor=CENTER)
         self.table.heading("Op_Reduce", text="Op_Reduce", anchor=CENTER)
-        self.table.heading("Bytes_send",text="Bytes Send",anchor=CENTER)
-        self.table.heading("Bytes_recv",text="Bytes Recv",anchor=CENTER)
+        self.table.heading("Bytes_send",text="Coll Bytes Send",anchor=CENTER)
+        self.table.heading("Bytes_recv",text="Coll Bytes Recv",anchor=CENTER)
         self.table.heading("Required_level", text="Required level", anchor=CENTER)
         self.table.heading("Provided_level", text="Provided level", anchor=CENTER)
 

@@ -14,7 +14,7 @@ MPI_BARRIER_OP = ['MpiBarrier' , 'MpiIbarrier']
 MPI_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter','MpiBcast','MpiReduce','MpiGather','MpiScatter']
 MPI_ASYNC_COLL_OP = ['MpiIbcast','MpiIreduce','MpiIgather','MpiIscatter']
 MPI_SYNC_COLL_OP = ['MpiBcast','MpiReduce','MpiGather','MpiScatter']
-OPERATION_REDUCE=['MPI_OP_NUL','MPI_MAX','MPI_MIN','MPI_SUM','MPI_PROD','MPI_LAND','MPI_BAND','MPI_LOR','MPI_BOR','MPI_LXOR','MPI_BXOR','MPI_MAXLOC','MPI_MINLOC','MPI_REPLACE']
+#OPERATION_REDUCE=['MPI_OP_NUL','MPI_MAX','MPI_MIN','MPI_SUM','MPI_PROD','MPI_LAND','MPI_BAND','MPI_LOR','MPI_BOR','MPI_LXOR','MPI_BXOR','MPI_MAXLOC','MPI_MINLOC','MPI_REPLACE']
 
 def tsc_after(elem):
     return elem["tsc"]+elem["duration"]
@@ -112,13 +112,13 @@ def draw_timeline_text(canvas,elem,x,y):
 
     elif(elem["type"]=="MpiReduce"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'\nOp: '+ str(OPERATION_REDUCE[elem["op_type"]])+
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'\nOp: '+ str(elem["op_type"])+
                            "\n root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]),
                            anchor=NW)
     elif(elem["type"]=="MpiIreduce"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'\nOp: '+ str(OPERATION_REDUCE[elem["op_type"]])+
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'\nOp: '+ str(elem["op_type"])+
                            "\n root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"])+"\n req: " +
                            str(elem["req"]),
@@ -218,7 +218,7 @@ def draw_table(elem,table, deb, ratio):
                      values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
                              "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
                              elem["current_rank"], '','', elem["comm"],
-                             elem["req"],elem["Root"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             elem["req"],elem["Root"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiScatter"):
         table.insert(parent='',
@@ -226,7 +226,21 @@ def draw_table(elem,table, deb, ratio):
                      values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
                              "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
                              elem["current_rank"], '','', elem["comm"],
-                             '',elem["partner_rank"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+                             '',elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
+    elif(elem["type"]=="MpiIreduce"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
+                             elem["current_rank"], '','', elem["comm"],
+                             elem["req"],elem["partner_rank"],elem["op_type"],'','','',''))
+    elif(elem["type"]=="MpiReduce"):
+        table.insert(parent='',
+                     index='end',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
+                             elem["current_rank"], '','', elem["comm"],
+                             '',elem["partner_rank"],elem["op_type"],'','','',''))
 
     return table
 
@@ -248,7 +262,7 @@ class pair_async_wait:
     def coverage(self):
         cost_op = self.op1["duration"] + self.op2["duration"]
         cost_compu = self.op2["tsc"] - tsc_after(self.op1)
-        return (cost_compu / cost_op) * 100
+        return (cost_op / cost_compu ) * 100
 
     def __init__(self, op1, op2):
         if op1["tsc"] < op2["tsc"]:
