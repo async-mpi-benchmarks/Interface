@@ -469,7 +469,6 @@ def ratio_cycle2sec(data):
 def json_reader(name):
     f = open(name)
     data = json.load(f)
-    data.sort(key = lambda x: x['tsc'])
     return data
 
 def test_reader(data):
