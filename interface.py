@@ -105,19 +105,19 @@ class Table_window(Tk):
         self.table_scrollx.config(command=self.table.xview)
         self.table_scrolly.config(command=self.table.yview)
 
-        self.table['columns'] = ('op_type', 'Time_before', 'Time_after',
+        self.table['columns'] = ('op_type', 'Time_before', 'Duration',
                                  'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
                                  'Request','Root','Op_Reduce','Bytes_send','Bytes_recv','Required_level','Provided_level')
 
         self.table.column("#0", width=0, stretch=NO)
         self.table.column("op_type", anchor=CENTER, width=120)
         self.table.column("Time_before", anchor=CENTER, width=100)
-        self.table.column("Time_after", anchor=CENTER, width=100)
-        self.table.column("Bytes", anchor=CENTER, width=100)
-        self.table.column("Rank", anchor=CENTER, width=100)
-        self.table.column("Partner", anchor=CENTER, width=100)
-        self.table.column("Tag", anchor=CENTER, width=100)
-        self.table.column("Comm", anchor=CENTER, width=100)
+        self.table.column("Duration", anchor=CENTER, width=100)
+        self.table.column("Bytes", anchor=CENTER, width=50)
+        self.table.column("Rank", anchor=CENTER, width=50)
+        self.table.column("Partner", anchor=CENTER, width=80)
+        self.table.column("Tag", anchor=CENTER, width=50)
+        self.table.column("Comm", anchor=CENTER, width=80)
         self.table.column("Request", anchor=CENTER, width=100)
         self.table.column("Root", anchor=CENTER, width=100)
         self.table.column("Op_Reduce", anchor=CENTER, width=100)
@@ -131,7 +131,7 @@ class Table_window(Tk):
         self.table.heading("Time_before",
                            text="Time before",
                            anchor=CENTER)
-        self.table.heading("Time_after", text="Time after", anchor=CENTER)
+        self.table.heading("Duration", text="Duration", anchor=CENTER)
         self.table.heading("Bytes", text="Bytes", anchor=CENTER)
         self.table.heading("Rank", text="Rank", anchor=CENTER)
         self.table.heading("Partner", text="Partner", anchor=CENTER)

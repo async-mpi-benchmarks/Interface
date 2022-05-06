@@ -151,80 +151,80 @@ def draw_table(elem,table, deb, ratio):
     if(elem["type"] in "MpiInit"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio), '', '',
                              elem["current_rank"], '', '', '', '','','','','','',''))
     elif(elem["type"] in "MpiInitThread"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio), '', '',
                              elem["current_rank"], '', '', '', '','','','','',elem['required_thread_lvl'],elem['proviwwwwwded_thread_lvl']))
     elif(elem["type"]=="MpiFinalize"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio), '', '',
                              elem["current_rank"], '', '', '', '','','','','','',''))
     elif(elem["type"]=="MpiWait"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, '', elem["current_rank"], '', '',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), '', elem["current_rank"], '', '',
                              '', elem["req"],'','','','','',''))
     elif(elem["type"]=="MpiIrecv" or elem["type"]=="MpiIsend"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
                              elem["req"],'','','','','',''))
     elif(elem["type"]=="MpiRecv" or elem["type"]=="MpiSend"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','','','','','',''))
     elif(elem["type"]=="MpiBarrier"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio,'',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio),'',
                              elem["current_rank"],'','', elem["comm"],'','','','','','',''))
 
     elif(elem["type"]=="MpiIbarrier"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio,'',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio),'',
                              elem["current_rank"],'','', elem["comm"],elem["req"],'','','','','',''))
 
     elif(elem["type"]=="MpiIbcast" or elem["type"]=="MpiIgather" or elem["type"]=="MpiIscatter"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, '',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), '',
                              elem["current_rank"], '','', elem["comm"],
                              elem["req"],elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiBcast" or elem["type"]=="MpiGather" or elem["type"]=="MpiScatter"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, '',
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), '',
                              elem["current_rank"], '','', elem["comm"],
                              '',elem["partner_rank"],'',elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiIscatter"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
                              elem["current_rank"], '','', elem["comm"],
                              elem["req"],elem["Root"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
     elif(elem["type"]=="MpiScatter"):
         table.insert(parent='',
                      index='end',
-                     values=(elem["type"], (elem["tsc"] - deb) / ratio,
-                             (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
+                     values=(elem["type"], "%.8f" % ((elem["tsc"] - deb) / ratio),
+                             "%.6e" % (elem["duration"] / ratio), elem["nb_bytes"],
                              elem["current_rank"], '','', elem["comm"],
                              '',elem["partner_rank"],OPERATION_REDUCE[elem["op_type"]],elem["nb_bytes_send"],elem["nb_bytes_recv"],'',''))
 
