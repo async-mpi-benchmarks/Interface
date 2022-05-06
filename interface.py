@@ -46,7 +46,7 @@ class global_info_window(Tk):
               info[1]) + "\n" + "Number of MPI function: " + str(
                 len(self.mpi_op_list)
                 ) + "\n" + "Number of bad async message: " + str(
-                    info[2]) + "\n" + "Average coverage of async call: " + str(round(100 - info[3], 2)) + "%\n"
+                    info[2]) + "\n" + "Average coverage of async call: " + str(round(info[3],2)) + "%\n"
             
         process_info = gather_process_info(self.mpi_op_list,info[0])
         for i in range(0,info[0]):
@@ -224,14 +224,14 @@ class Timeline_window(Tk):
         for i in range(1, self.nb_ra):
             self.timeline_canvas.create_line(
                 0,
-                i * 130 + self.voffset,
+                i * 150 + self.voffset - 10,
                 self.timeline_canvas.bbox("all")[2],
-                i * 130 + self.voffset,
+                i * 150 + self.voffset - 10,
                 dash=(4, 4))
         
         for i in range(0, self.nb_ra):
             self.timeline_canvas.create_text(0,
-                                             70 + 140 * i,
+                                             70 + 150 * i - 10,
                                              text=str(i),
                                              anchor='w')
         i = 0

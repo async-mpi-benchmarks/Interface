@@ -248,9 +248,9 @@ def make_pair_isw(mpi_operation):
     pair_isw = []
     for i in range(0, len(mpi_operation)):
         for j in range(i, len(mpi_operation)):
-            if (((mpi_operation[i]["type"] in MPI_ASYNC_OP) and (mpi_operation[j]["type"] in MPI_WAIT_OP)) 
-                or ((mpi_operation[j]["type"] in MPI_ASYNC_OP) and (mpi_operation[i]["type"] in MPI_WAIT_OP))):
+            if (((mpi_operation[i]["type"] in MPI_ASYNC_OP) and (mpi_operation[j]["type"] in MPI_WAIT_OP))):
                 if (mpi_operation[i]["req"] == mpi_operation[j]["req"]) and (mpi_operation[i]["current_rank"] == mpi_operation[j]["current_rank"]):
+
                     pair_isw.append(pair_async_wait(mpi_operation[i], mpi_operation[j]))
                     break
 
@@ -262,7 +262,11 @@ class pair_async_wait:
     def coverage(self):
         cost_op = self.op1["duration"] + self.op2["duration"]
         cost_compu = self.op2["tsc"] - tsc_after(self.op1)
-        return (cost_compu/cost_op) * 100
+        cov = (cost_compu/cost_op) * 100
+        if(cov < 100):
+            return cov
+        else:
+            return 100 
 
     def __init__(self, op1, op2):
         if op1["tsc"] < op2["tsc"]:
@@ -276,6 +280,7 @@ class pair_async_wait:
     def print(self):
         print(self.op1)
         print(self.op2)
+        print("coverage: " + str(self.coverage))
 
 
 class pair_send_receiv:
@@ -342,17 +347,17 @@ def gather_info(liste_mpi_op, liste_isw):
     info[1] = nb_message
 
     nb_bad_async = 0
-    compu_cost = 0
-    mpi_cost = 0
+    cov = 0
+    cpt = 0
     for elem in liste_isw:
         if elem.coverage < 100:
             nb_bad_async = nb_bad_async + 1
-        compu_cost = compu_cost + (elem.op2["tsc"] - tsc_after(elem.op1))
-        mpi_cost = mpi_cost + (elem.op1["duration"] + elem.op2["duration"])
+        cov = cov + elem.coverage
+        cpt = cpt + 1
 
     if len(liste_isw):
         info[2] = nb_bad_async
-        info[3] = (compu_cost / mpi_cost) * 100
+        info[3] = cov/cpt
     else:
         info[2] = "No Async"
         info[3] = 0
@@ -397,7 +402,7 @@ def gather_process_info(liste_mpi_op,nb_rank):
     list_string = []
     for i in range(0,nb_rank):
         list_string.append("Messages sent:\t\t" + str(process_info[i]["nb_message_sent"]) + "\n" +
-            "Messages received:\t\t" + str(process_info[i]["nb_message_recv"]) + "\n" +
+            "Messages received:\t" + str(process_info[i]["nb_message_recv"]) + "\n" +
             "Barriers:\t\t\t" + str(process_info[i]["nb_barrier"]) + "\n" +
             "Async operation:\t\t" + str(process_info[i]["nb_async_op"]) + "\n" +
             "Sync operation:\t\t" + str(process_info[i]["nb_sync_op"]) + "\n" +
@@ -434,15 +439,21 @@ def nb_bad_async_message(liste):
 
 
 def total_asynchronisme(liste):
-    compu_cost = 0
-    mpi_cost = 0
-    for elem in liste:
-        compu_cost = compu_cost + (elem.op2["tsc"] - tsc_after(elem.op1))
-        mpi_cost = mpi_cost + (elem.op1["duration"] + elem.op2["duration"])
-    if len(liste):
-        return (compu_cost / mpi_cost) * 100
+    nb_bad_async = 0
+    cov = 0
+    cpt = 0
+    for elem in liste_isw:
+        if elem.coverage < 100:
+            nb_bad_async = nb_bad_async + 1
+        cov = cov + elem.coverage
+        cpt = cpt + 1
+    if len(liste_isw):
+        info[2] = nb_bad_async
+        info[3] = cov/cpt
     else:
-        return 0
+        info[2] = "No Async"
+        info[3] = 0
+    return info
 
 
 def ratio_cycle2sec(data):
