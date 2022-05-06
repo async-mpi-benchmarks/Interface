@@ -80,7 +80,8 @@ def draw_timeline_text(canvas,elem,x,y):
 
     elif(elem["type"]=="MpiIgather"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           text=str(elem["type"]) + "\n nb_bytes_send: " + str(elem["nb_bytes_send"]) +
+                           + "\n nb_bytes_recv: " + str(elem["nb_bytes_recv"]) +
                            " root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]) + "\n req: " +
                            str(elem["req"]),
@@ -88,14 +89,14 @@ def draw_timeline_text(canvas,elem,x,y):
 
     elif(elem["type"]=="MpiGather"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           text=str(elem["type"]) + "\n nb_bytes_send: " + str(elem["nb_bytes_send"]) + "\n nb_bytes_recv: " + str(elem["nb_bytes_recv"]) +
                            " root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]),
                            anchor=NW)
 
     elif(elem["type"]=="MpiIscatter"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           text=str(elem["type"]) + "\n nb_bytes_send: " + str(elem["nb_bytes_send"]) + "\n nb_bytes_recv: " + str(elem["nb_bytes_recv"]) +
                            " root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]) + "\n req: " +
                            str(elem["req"]),
@@ -103,7 +104,7 @@ def draw_timeline_text(canvas,elem,x,y):
 
     elif(elem["type"]=="MpiIscatter"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +
+                           text=str(elem["type"]) + "\n nb_bytes_send: " + str(elem["nb_bytes_send"]) + "\n nb_bytes_recv: " + str(elem["nb_bytes_recv"]) +
                            " root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]) + "\n req: " +
                            str(elem["req"]),
@@ -111,13 +112,13 @@ def draw_timeline_text(canvas,elem,x,y):
 
     elif(elem["type"]=="MpiReduce"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'Op: '+ OPERATION_REDUCE[elem["operation"]]+
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'Op: '+ OPERATION_REDUCE[elem["op_type"]]+
                            "\n root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"]),
                            anchor=NW)
     elif(elem["type"]=="MpiIreduce"):
         canvas.create_text(x,y,
-                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'Op: '+ OPERATION_REDUCE[elem["operation"]]+
+                           text=str(elem["type"]) + "\n nb_bytes: " + str(elem["nb_bytes"]) +'Op: '+ OPERATION_REDUCE[elem["op_type"]]+
                            "\n root: " + str(elem["partner_rank"]) + "\n" +" comm: " +
                            str(elem["comm"])+"\n req: " +
                            str(elem["req"]),
@@ -151,42 +152,42 @@ def draw_table(elem,table, deb, ratio):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
-                             elem["current_rank"], '', '', '', '','','','',''))
+                             elem["current_rank"], '', '', '', '','','','','','',''))
     elif(elem["type"] in "MpiInitThread"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
-                             elem["current_rank"], '', '', '', '','','',elem['required_thread_lvl'],elem['provided_thread_lvl']))
+                             elem["current_rank"], '', '', '', '','','','','',elem['required_thread_lvl'],elem['proviwwwwwded_thread_lvl']))
     elif(elem["type"]=="MpiFinalize"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio, '', '',
-                             elem["current_rank"], '', '', '', '','','','',''))
+                             elem["current_rank"], '', '', '', '','','','','','',''))
     elif(elem["type"]=="MpiWait"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, '', elem["current_rank"], '', '',
-                             '', elem["req"],'','','',''))
+                             '', elem["req"],'','','','','',''))
     elif(elem["type"]=="MpiIrecv" or elem["type"]=="MpiIsend"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
                              elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],
-                             elem["req"],'','','',''))
+                             elem["req"],'','','','','',''))
     elif(elem["type"]=="MpiRecv" or elem["type"]=="MpiSend"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio, elem["nb_bytes"],
-                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','','','',''))
+                             elem["current_rank"], elem["partner_rank"], elem["tag"], elem["comm"],'','','','','','',''))
     elif(elem["type"]=="MpiBarrier"):
         table.insert(parent='',
                      index='end',
                      values=(elem["type"], (elem["tsc"] - deb) / ratio,
                              (tsc_after(elem) - deb) / ratio,'',
-                             elem["current_rank"],'','', elem["comm"],'','','','',''))
+                             elem["current_rank"],'','', elem["comm"],'','','','','','',''))
 
 
     return table

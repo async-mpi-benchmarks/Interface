@@ -107,7 +107,7 @@ class Table_window(Tk):
 
         self.table['columns'] = ('op_type', 'Time_before', 'Time_after',
                                  'Bytes', 'Rank', 'Partner', 'Tag', 'Comm',
-                                 'Request','Root','Op_Reduce','Required_level','Provided_level')
+                                 'Request','Root','Op_Reduce','Bytes_send','Bytes_recv','Required_level','Provided_level')
 
         self.table.column("#0", width=0, stretch=NO)
         self.table.column("op_type", anchor=CENTER, width=120)
@@ -121,8 +121,11 @@ class Table_window(Tk):
         self.table.column("Request", anchor=CENTER, width=100)
         self.table.column("Root", anchor=CENTER, width=100)
         self.table.column("Op_Reduce", anchor=CENTER, width=100)
+        self.table.column("Bytes_send",anchor=CENTER,width=100)
+        self.table.column("Bytes_recv",anchor=CENTER,width=100)
         self.table.column("Required_level", anchor=CENTER, width=100)
         self.table.column("Provided_level", anchor=CENTER, width=100)
+        
         self.table.heading("#0", text="", anchor=CENTER)
         self.table.heading("op_type", text="Operation Type", anchor=CENTER)
         self.table.heading("Time_before",
@@ -137,6 +140,8 @@ class Table_window(Tk):
         self.table.heading("Request", text="Request", anchor=CENTER)
         self.table.heading("Root", text="Root", anchor=CENTER)
         self.table.heading("Op_Reduce", text="Op_Reduce", anchor=CENTER)
+        self.table.heading("Bytes_send",text="Bytes Send",anchor=CENTER)
+        self.table.heading("Bytes_recv",text="Bytes Recv",anchor=CENTER)
         self.table.heading("Required_level", text="Required level", anchor=CENTER)
         self.table.heading("Provided_level", text="Provided level", anchor=CENTER)
 
